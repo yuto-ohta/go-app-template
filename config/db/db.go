@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	Db  *gorm.DB
-	err error
+	Conn *gorm.DB
+	err  error
 )
 
 func init() {
@@ -18,7 +18,7 @@ func init() {
 	PARAM := "charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true"
 
 	DSN := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?" + PARAM
-	Db, err = gorm.Open(mysql.Open(DSN), &gorm.Config{})
+	Conn, err = gorm.Open(mysql.Open(DSN), &gorm.Config{})
 
 	if err != nil {
 		panic(err.Error())

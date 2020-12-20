@@ -13,7 +13,7 @@ func (u UserRepositoryImpl) FindById(id int) (domain.User, error) {
 	var user domain.User
 	var err error
 
-	if err = db.Db.Raw("SELECT * FROM users WHERE id = ?", id).Scan(&user).Error; err != nil {
+	if err = db.Conn.Raw("SELECT * FROM users WHERE id = ?", id).Scan(&user).Error; err != nil {
 		return user, err
 	}
 
