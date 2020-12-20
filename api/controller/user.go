@@ -11,13 +11,14 @@ import (
 )
 
 type UserController struct {
+	UserUseCase usecase.UserUseCase
 }
 
 /*
 	@path_param userId
 	@return user
 */
-func GetUser(c echo.Context) error {
+func (u UserController) GetUser(c echo.Context) error {
 	var err error
 
 	// get userId
@@ -28,8 +29,7 @@ func GetUser(c echo.Context) error {
 
 	// get user
 	var user domain.User
-	userUseCase := usecase.UserUseCase{}
-	if user, err = userUseCase.FindById(id); err != nil {
+	if user, err = u.UserUseCase.FindById(id); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
