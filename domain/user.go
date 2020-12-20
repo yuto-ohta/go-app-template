@@ -5,5 +5,5 @@ type User struct {
 	Name string
 }
 
-type UserId struct {
-}
+//type UserId struct {
+//}
