@@ -18,8 +18,8 @@ func NewRouter() *echo.Echo {
 
 	// make instance
 	userRepository := infrastructure.UserRepositoryImpl{}
-	userUseCase := usecase.UserUseCase{userRepository}
-	userController := controller.UserController{userUseCase}
+	userUseCase := usecase.UserUseCase{UserRepository: userRepository}
+	userController := controller.UserController{UserUseCase: userUseCase}
 
 	// routing
 	e.GET("/user/:id", userController.GetUser)

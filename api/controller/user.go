@@ -15,6 +15,7 @@ type UserController struct {
 }
 
 /*
+	ユーザーをuserIDで取得する
 	@path_param userId
 	@return user
 */
