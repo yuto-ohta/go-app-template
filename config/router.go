@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"go-app-template/api/controller"
 	"go-app-template/infrastructure"
-	"go-app-template/usecase"
+	"go-app-template/usecase/impl"
 )
 
 func NewRouter() *echo.Echo {
@@ -18,7 +18,7 @@ func NewRouter() *echo.Echo {
 
 	// make instance
 	userRepository := infrastructure.UserRepositoryImpl{}
-	userUseCase := usecase.UserUseCase{UserRepository: userRepository}
+	userUseCase := impl.UserUseCaseImpl{UserRepository: userRepository}
 	userController := controller.UserController{UserUseCase: userUseCase}
 
 	// routing
