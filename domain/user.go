@@ -4,6 +4,3 @@ type User struct {
 	ID   int
 	Name string
 }
-
-//type UserId struct {
-//}
