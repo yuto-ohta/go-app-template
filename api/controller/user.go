@@ -48,27 +48,10 @@ func (u UserController) GetUser(c echo.Context) error {
 }
 
 func getUserIdParam(c echo.Context) (int, error) {
-	var id int
-	var err error
+	id, err := strconv.Atoi(c.Param("id"))
 
-	// check is "id" not empty
-	if c.Param("id") == "" {
-		err = fmt.Errorf("missing required argument: \"id\"")
-		return id, err
-	}
-
-	// check is "id" string
-	if reflect.TypeOf(c.Param("id")).Kind() != reflect.String {
-		err = fmt.Errorf("\"id\" must be string: %v", c.Param("id"))
-		return id, err
-	}
-
-	// parse string to int
-	id, err = strconv.Atoi(c.Param("id"))
-
-	// check parsing error has occurred
 	if err != nil {
-		return id, err
+		return 0, err
 	}
 
 	return id, nil
