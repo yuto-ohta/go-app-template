@@ -1,21 +1,24 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-app-template/domain"
 	"go-app-template/usecase"
+	"gorm.io/gorm"
 	"net/http"
-	"reflect"
 	"strconv"
 )
 
 type UserController struct {
-	UserUseCase usecase.UserUseCase
+	userUseCase usecase.UserUseCase
+}
+
+func NewUserController(useCase usecase.UserUseCase) *UserController {
+	return &UserController{userUseCase: useCase}
 }
 
 /*
-	ユーザーをuserIDで取得する
+	ユーザーをuserIdで取得する
 	@path_param userId
 	@return user
 */
@@ -25,12 +28,19 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get userId
 	var id int
 	if id, err = getUserIdParam(c); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
+	userId := domain.NewUserId(id)
 
 	// get user
 	var user domain.User
-	if user, err = u.UserUseCase.FindById(id); err != nil {
+	user, err = u.userUseCase.FindById(*userId)
+	
+	if err == gorm.ErrRecordNotFound {
+		// RecordNotFoundのときは404を返す
+		return c.JSON(http.StatusNotFound, err.Error())
+	} else if err != nil {
+		// それ以外の意図しないエラーが返ったときは500を返す
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 

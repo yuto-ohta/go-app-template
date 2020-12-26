@@ -17,9 +17,9 @@ func NewRouter() *echo.Echo {
 	e.Use(middleware.Recover())
 
 	// make instance
-	userRepository := infrastructure.UserRepositoryImpl{}
-	userUseCase := impl.UserUseCaseImpl{UserRepository: userRepository}
-	userController := controller.UserController{UserUseCase: userUseCase}
+	userRepository := infrastructure.NewUserRepositoryImpl()
+	userUseCase := impl.NewUserUseCaseImpl(userRepository)
+	userController := controller.NewUserController(userUseCase)
 
 	// routing
 	e.GET("/user/:id", userController.GetUser)

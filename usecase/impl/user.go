@@ -6,10 +6,13 @@ import (
 )
 
 type UserUseCaseImpl struct {
-	UserRepository repository.UserRepository
+	userRepository repository.UserRepository
 }
 
-func (u UserUseCaseImpl) FindById(id int) (domain.User, error) {
-	user, err := u.UserRepository.FindById(id)
-	return user, err
+func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseImpl {
+	return &UserUseCaseImpl{userRepository: userRepository}
+}
+
+func (u UserUseCaseImpl) FindById(id domain.UserId) (domain.User, error) {
+	return u.userRepository.FindById(id)
 }
