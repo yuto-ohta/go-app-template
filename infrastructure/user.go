@@ -3,8 +3,10 @@ package infrastructure
 import (
 	"go-app-template/config/db"
 	"go-app-template/domain"
+	"go-app-template/errors"
 	"go-app-template/infrastructure/model"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type UserRepositoryImpl struct {
@@ -26,7 +28,7 @@ func (u UserRepositoryImpl) FindById(id domain.UserId) (domain.User, error) {
 	user = *userModel.ToDomain()
 
 	if user.GetId().GetValue() == 0 {
-		err = gorm.ErrRecordNotFound
+		err = errors.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
 		return user, err
 	}
 

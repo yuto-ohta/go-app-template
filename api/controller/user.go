@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-app-template/domain"
+	appErrors "go-app-template/errors"
+	"go-app-template/errors/messages"
 	"go-app-template/usecase"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
@@ -28,20 +31,19 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get userId
 	var id int
 	if id, err = getUserIdParam(c); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return appErrors.ResponseErrorJSON(c, err, fmt.Sprintf("%v, ユーザーID: %v", messages.InvalidUserId.String(), c.Param("id")))
 	}
 	userId := domain.NewUserId(id)
 
 	// get user
 	var user domain.User
 	user, err = u.userUseCase.FindById(*userId)
-	
-	if err == gorm.ErrRecordNotFound {
-		// RecordNotFoundのときは404を返す
-		return c.JSON(http.StatusNotFound, err.Error())
-	} else if err != nil {
-		// それ以外の意図しないエラーが返ったときは500を返す
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	var appErr *appErrors.AppError
+	if err != nil {
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
+			return appErrors.ResponseErrorJSON(c, err, messages.UserNotFound.String())
+		}
+		return appErrors.ResponseErrorJSON(c, err, messages.SystemError.String())
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -51,7 +53,8 @@ func getUserIdParam(c echo.Context) (int, error) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return 0, err
+		appErr := appErrors.NewAppError(err, http.StatusBadRequest)
+		return 0, appErr
 	}
 
 	return id, nil
