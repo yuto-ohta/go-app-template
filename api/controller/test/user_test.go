@@ -24,7 +24,7 @@ func TestUserController_userID_1でユーザーが取得できること(t *testi
 	actualCode := rec.Code
 	var actualBody domain.User
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("UnknownError: err %v, ResponceBody %v", err.Error(), rec.Body.String())
+		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
 	}
 
 	assert.Equal(t, expectedCode, actualCode)
@@ -43,7 +43,7 @@ func TestUserController_存在しないuserIDで404が返ること(t *testing.T)
 	actualCode := rec.Code
 	var actualBody string
 	if err := json.Unmarshal(rec.Body.Bytes(), &actualBody); err != nil {
-		t.Errorf("UnknownError: err %v, ResponceBody %v", err.Error(), rec.Body.String())
+		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
 	}
 
 	assert.Equal(t, expectedCode, actualCode)
@@ -63,7 +63,7 @@ func TestUserController_userIDが数字ではないときは400が返ること(t
 	actualCode := rec.Code
 	var actualBody string
 	if err := json.Unmarshal(rec.Body.Bytes(), &actualBody); err != nil {
-		t.Errorf("UnknownError: err %v, ResponceBody %v", err.Error(), rec.Body.String())
+		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
 	}
 
 	assert.Equal(t, expectedCode, actualCode)
