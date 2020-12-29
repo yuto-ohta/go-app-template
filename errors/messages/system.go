@@ -6,11 +6,9 @@ const (
 	SystemError System = iota
 )
 
-func (e System) String() string {
-	switch e {
-	case SystemError:
-		fallthrough
-	default:
-		return "システムエラー"
+func (s System) String() string {
+	var messages = map[System]string{
+		SystemError: "システムエラー",
 	}
+	return messages[s]
 }
