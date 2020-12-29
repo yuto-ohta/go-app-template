@@ -1,39 +1,79 @@
 package test
 
 import (
+	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
+	"go-app-template/config"
 	"go-app-template/domain"
+	appErrors "go-app-template/errors"
+	"go-app-template/errors/test/mock"
 	"go-app-template/infrastructure"
 	"go-app-template/usecase/impl"
 	"gorm.io/gorm"
+	"net/http"
+	"os"
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	// before all
+	config.LoadConfig()
+
+	// run each test
+	code := m.Run()
+
+	// after all
+
+	// finish test
+	os.Exit(code)
+}
+
 func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testing.T) {
+	// setup
 	userId := domain.NewUserId(1)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	actual, err := target.FindById(*userId)
 
-	// 予想外のエラーが発生した場合はFail
+	// actual
+	actual, err := target.FindById(*userId)
 	if err != nil {
-		t.Errorf("Unknown Error: %v", err.Error())
+		t.Errorf(fmt.Sprintf("ユーザー取得にエラーが発生しています, エラー: %v", err))
 	}
 
-	// TODO: Mockに差し替えるかテスト用DBを用意する
+	// expected
+	// TODO: DB周りのテスト環境整備
 	expected := *domain.NewUser(*userId, "taro")
+
+	// check
 	assert.Equal(t, expected, actual)
 }
 
 func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返ること(t *testing.T) {
+	// setup
 	userId := domain.NewUserId(9999)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	user, actualErr := target.FindById(*userId)
 
-	// RecordNotFoundが返るはずなので、エラーがnilの場合はFail
+	// actual
+	_, actualErr := target.FindById(*userId)
+	var actualErrStatus int
+
+	var appErr *appErrors.AppError
 	if actualErr == nil {
-		t.Errorf("Unknown Error: %v, user: %v", "actualErrがなぜかnilになっています", user)
+		t.Errorf("エラーが発生していません。RecordNotFoundが返るはず")
+	}
+	if errors.As(actualErr, &appErr) {
+		actualErrStatus = appErr.GetHttpStatus()
+	} else {
+		t.Errorf("エラーがAppErrorになっていません")
 	}
 
-	expectedErr := gorm.ErrRecordNotFound
-	assert.Equal(t, expectedErr, actualErr)
+	// expected
+	const FilePath = "go-app-template/infrastructure/user.go"
+	const Line = 31
+	expectedErr := mock.NewAppErrorMock(gorm.ErrRecordNotFound, http.StatusNotFound, FilePath, Line)
+	expectedErrStatus := expectedErr.GetHttpStatus()
+
+	// check
+	assert.Equal(t, expectedErrStatus, actualErrStatus)
+	assert.Equal(t, expectedErr.Error(), actualErr.Error())
 }

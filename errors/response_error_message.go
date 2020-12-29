@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type responseErrorMessage struct {
+type ResponseErrorMessage struct {
 	status  int
 	message string
 }
@@ -16,14 +16,6 @@ type responseErrorMessage struct {
 type responseErrorMessageJSON struct {
 	Status  int
 	Message string
-}
-
-func (a responseErrorMessage) MarshalJSON() ([]byte, error) {
-	value, err := json.Marshal(&responseErrorMessageJSON{
-		Status:  a.status,
-		Message: a.message,
-	})
-	return value, err
 }
 
 func ResponseErrorJSON(c echo.Context, err error, errMessage string) error {
@@ -47,8 +39,36 @@ func ResponseErrorJSON(c echo.Context, err error, errMessage string) error {
 	return c.JSON(httpStatus, newResponseErrorMessage(httpStatus, errMessage))
 }
 
-func newResponseErrorMessage(status int, message string) *responseErrorMessage {
-	return &responseErrorMessage{
+func (r ResponseErrorMessage) MarshalJSON() ([]byte, error) {
+	value, err := json.Marshal(&responseErrorMessageJSON{
+		Status:  r.status,
+		Message: r.message,
+	})
+	return value, err
+}
+
+func (r *ResponseErrorMessage) UnmarshalJSON(b []byte) error {
+	var responseErrorMessageJSON responseErrorMessageJSON
+	if err := json.Unmarshal(b, &responseErrorMessageJSON); err != nil {
+		return err
+	}
+
+	r.status = responseErrorMessageJSON.Status
+	r.message = responseErrorMessageJSON.Message
+
+	return nil
+}
+
+func (r ResponseErrorMessage) GetStatus() int {
+	return r.status
+}
+
+func (r ResponseErrorMessage) GetMessage() string {
+	return r.message
+}
+
+func newResponseErrorMessage(status int, message string) *ResponseErrorMessage {
+	return &ResponseErrorMessage{
 		status:  status,
 		message: message,
 	}

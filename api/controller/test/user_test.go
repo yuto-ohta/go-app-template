@@ -1,71 +1,90 @@
 package test
 
 import (
-	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	"go-app-template/config"
+	"go-app-template/config/routes"
 	"go-app-template/domain"
-	"gorm.io/gorm"
+	"go-app-template/errors"
+	"go-app-template/errors/messages"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 )
 
 func TestUserController_userID_1でユーザーが取得できること(t *testing.T) {
-	router := config.NewRouter()
+	// setup
+	router := routes.NewRouter()
 	req := httptest.NewRequest("GET", "/user/1", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
-	expectedCode := http.StatusOK
-	expectedBody := *domain.NewUser(*domain.NewUserId(1), "taro")
-
+	// actual
 	actualCode := rec.Code
 	var actualBody domain.User
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
+		t.Errorf("ResponseBodyがdomain.Userの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
 
+	// expected
+	expectedCode := http.StatusOK
+	// TODO: DB周りのテスト環境整備
+	expectedBody := *domain.NewUser(*domain.NewUserId(1), "taro")
+
+	// check
 	assert.Equal(t, expectedCode, actualCode)
 	assert.Equal(t, expectedBody, actualBody)
 }
 
 func TestUserController_存在しないuserIDで404が返ること(t *testing.T) {
-	router := config.NewRouter()
+	// setup
+	router := routes.NewRouter()
 	req := httptest.NewRequest("GET", "/user/9999", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
-	expectedCode := http.StatusNotFound
-	expectedBody := gorm.ErrRecordNotFound.Error()
-
+	// actual
 	actualCode := rec.Code
-	var actualBody string
-	if err := json.Unmarshal(rec.Body.Bytes(), &actualBody); err != nil {
-		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
+	var actualBody errors.ResponseErrorMessage
+	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
+		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
+	actualStatus := actualBody.GetStatus()
+	actualMessage := actualBody.GetMessage()
 
+	// expected
+	expectedCode := http.StatusNotFound
+	expectedStatus := expectedCode
+	expectedMessage := messages.UserNotFound.String()
+
+	// check
 	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedBody, actualBody)
+	assert.Equal(t, expectedStatus, actualStatus)
+	assert.Equal(t, expectedMessage, actualMessage)
 }
 
 func TestUserController_userIDが数字ではないときは400が返ること(t *testing.T) {
-	router := config.NewRouter()
+	// setup
+	router := routes.NewRouter()
 	req := httptest.NewRequest("GET", "/user/taro", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
-	expectedCode := http.StatusBadRequest
-	_, err := strconv.Atoi("taro")
-	expectedBody := err.Error()
-
+	// actual
 	actualCode := rec.Code
-	var actualBody string
-	if err := json.Unmarshal(rec.Body.Bytes(), &actualBody); err != nil {
-		t.Errorf("UnknownError: err %v, ResponseBody %v", err.Error(), rec.Body.String())
+	var actualBody errors.ResponseErrorMessage
+	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
+		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
+	actualStatus := actualBody.GetStatus()
+	actualMessage := actualBody.GetMessage()
 
+	// expected
+	expectedCode := http.StatusBadRequest
+	expectedStatus := expectedCode
+	expectedMessage := messages.InvalidUserId.String()
+
+	// check
 	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedBody, actualBody)
+	assert.Equal(t, expectedStatus, actualStatus)
+	assert.Equal(t, expectedMessage, actualMessage)
 }

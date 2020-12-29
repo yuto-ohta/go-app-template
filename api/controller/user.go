@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-app-template/domain"
 	appErrors "go-app-template/errors"
@@ -31,7 +30,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get userId
 	var id int
 	if id, err = getUserIdParam(c); err != nil {
-		return appErrors.ResponseErrorJSON(c, err, fmt.Sprintf("%v, ユーザーID: %v", messages.InvalidUserId.String(), c.Param("id")))
+		return appErrors.ResponseErrorJSON(c, err, messages.InvalidUserId.String())
 	}
 	userId := domain.NewUserId(id)
 
@@ -40,9 +39,11 @@ func (u UserController) GetUser(c echo.Context) error {
 	user, err = u.userUseCase.FindById(*userId)
 	var appErr *appErrors.AppError
 	if err != nil {
+		// 該当のユーザーが存在しない場合
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
 			return appErrors.ResponseErrorJSON(c, err, messages.UserNotFound.String())
 		}
+		// 予期せぬエラー
 		return appErrors.ResponseErrorJSON(c, err, messages.SystemError.String())
 	}
 
