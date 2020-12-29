@@ -2,7 +2,9 @@ package errors
 
 import (
 	"fmt"
+	"go-app-template/config"
 	"runtime"
+	"strings"
 )
 
 type AppError struct {
@@ -31,11 +33,13 @@ func NewAppError(err error, status int) *AppError {
 }
 
 func getCallerData(skip int) (string, int) {
-	_, fileName, line, ok := runtime.Caller(skip)
+	_, fileAbsPath, line, ok := runtime.Caller(skip)
 	if !ok {
-		fileName = "???"
-		line = 0
+		return "???", 0
 	}
 
-	return fileName, line
+	projectName := config.Config.ProjectName
+	fileProjectPath := fileAbsPath[strings.Index(fileAbsPath, projectName):]
+
+	return fileProjectPath, line
 }
