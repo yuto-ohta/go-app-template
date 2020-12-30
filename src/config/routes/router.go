@@ -3,9 +3,9 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"go-app-template/api/controller"
-	"go-app-template/infrastructure"
-	"go-app-template/usecase/impl"
+	"go-app-template/src/api/controller"
+	"go-app-template/src/infrastructure"
+	"go-app-template/src/usecase/impl"
 )
 
 func NewRouter() *echo.Echo {

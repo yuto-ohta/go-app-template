@@ -13,7 +13,7 @@ var (
 func init() {
 	USER := "root"
 	PASS := "mysql"
-	PROTOCOL := "tcp(localhost:3306)"
+	PROTOCOL := "tcp(db:3306)"
 	DBNAME := "development"
 	PARAM := "charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true"
 

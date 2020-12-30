@@ -1,10 +1,10 @@
 package infrastructure
 
 import (
-	"go-app-template/config/db"
-	"go-app-template/domain"
-	"go-app-template/errors"
-	"go-app-template/infrastructure/model"
+	"go-app-template/src/config/db"
+	"go-app-template/src/domain"
+	"go-app-template/src/errors"
+	"go-app-template/src/infrastructure/model"
 	"gorm.io/gorm"
 	"net/http"
 )

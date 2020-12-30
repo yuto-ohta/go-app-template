@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"go-app-template/domain"
-	"go-app-template/domain/repository"
+	"go-app-template/src/domain"
+	"go-app-template/src/domain/repository"
 )
 
 type UserUseCaseImpl struct {

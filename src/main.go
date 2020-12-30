@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-app-template/config"
-	"go-app-template/config/routes"
+	"go-app-template/src/config"
+	"go-app-template/src/config/routes"
 )
 
 func main() {

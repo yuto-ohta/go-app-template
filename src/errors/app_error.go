@@ -2,7 +2,7 @@ package errors
 
 import (
 	"fmt"
-	"go-app-template/config"
+	"go-app-template/src/config"
 	"runtime"
 	"strings"
 )

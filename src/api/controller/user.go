@@ -3,10 +3,10 @@ package controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"go-app-template/domain"
-	appErrors "go-app-template/errors"
-	"go-app-template/errors/messages"
-	"go-app-template/usecase"
+	"go-app-template/src/domain"
+	appErrors "go-app-template/src/errors"
+	"go-app-template/src/errors/messages"
+	"go-app-template/src/usecase"
 	"net/http"
 	"strconv"
 )

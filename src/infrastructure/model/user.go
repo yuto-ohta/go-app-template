@@ -1,6 +1,6 @@
 package model
 
-import "go-app-template/domain"
+import "go-app-template/src/domain"
 
 type User struct {
 	ID   int

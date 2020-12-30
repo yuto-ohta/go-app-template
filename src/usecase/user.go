@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"go-app-template/domain"
+	"go-app-template/src/domain"
 )
 
 type UserUseCase interface {

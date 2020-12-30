@@ -2,10 +2,10 @@ package test
 
 import (
 	"github.com/stretchr/testify/assert"
-	"go-app-template/config/routes"
-	"go-app-template/domain"
-	"go-app-template/errors"
-	"go-app-template/errors/messages"
+	"go-app-template/src/config/routes"
+	"go-app-template/src/domain"
+	"go-app-template/src/errors"
+	"go-app-template/src/errors/messages"
 	"net/http"
 	"net/http/httptest"
 	"testing"
