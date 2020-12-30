@@ -22,7 +22,7 @@ func LoadConfig() {
 
 func getConfigJSON() configJSON {
 	configFilePath := getConfigFilePath()
-	b, err := ioutil.ReadFile(configFilePath)
+	b, err := ioutil.ReadFile(filepath.Clean(configFilePath))
 	if err != nil {
 		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())
 	}
