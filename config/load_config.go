@@ -13,11 +13,11 @@ type configJSON struct {
 }
 
 var (
-	Config configJSON
+	Properties configJSON
 )
 
 func LoadConfig() {
-	Config = getConfigJSON()
+	Properties = getConfigJSON()
 }
 
 func getConfigJSON() configJSON {

@@ -38,7 +38,7 @@ func getCallerData(skip int) (string, int) {
 		return "???", 0
 	}
 
-	projectName := config.Config.ProjectName
+	projectName := config.Properties.ProjectName
 	fileProjectPath := fileAbsPath[strings.Index(fileAbsPath, projectName):]
 
 	return fileProjectPath, line
