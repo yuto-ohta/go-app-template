@@ -1,0 +1,31 @@
+version: '3.4'
+services:
+  app:
+    container_name: go-app-template_app
+    build:
+      context: .
+      dockerfile: docker/app/DockerFile
+    env_file: .env.dev
+    volumes:
+      - ./:/go-app-template
+    #      - ~/go/:/go
+    stdin_open: true
+    tty: true
+    privileged: true
+    depends_on:
+      - db
+    ports:
+      - "1323:1323"
+  db:
+    container_name: go-app-template_db
+    build:
+      context: .
+      dockerfile: docker/db/DockerFile
+    env_file: .env.dev
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      #      - "/docker/db/conf:/etc/mysql/conf.d"
+      - ./docker/db/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
