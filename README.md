@@ -4,31 +4,13 @@
 ├── docker
 │   ├── app
 │   └── db
-│       ├── data
-│       │   ├── development
-│       │   ├── mysql
-│       │   ├── performance_schema
-│       │   └── sys
-│       └── init
 └── src
     ├── api
-    │   └── controller
-    │       └── test
     ├── config
-    │   ├── db
-    │   └── routes
     ├── domain
-    │   └── repository
     ├── errors
-    │   ├── messages
-    │   └── test
-    │       └── mock
     ├── infrastructure
-    │   └── model
-    ├── tmp
     └── usecase
-        └── impl
-            └── test
 ```
 ## ■What is
 
