@@ -19,7 +19,9 @@ RUN go mod download
 
 COPY . .
 
-#CMD ["go", "run", "/go-app-template/src/main.go"]
-# or
+# go mod downloadだとgo/binに入らないみたいなので個別にgo getする
+RUN go get -u github.com/kyoh86/richgo
 RUN go get github.com/pilu/fresh
 CMD ["fresh"]
+# or
+#CMD ["go", "run", "/go-app-template/src/main.go"]
