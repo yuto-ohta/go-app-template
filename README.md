@@ -20,11 +20,17 @@
 
 ## ■Setup
 
+### 1. build & run
 `docker-compose build` (first time only)
 
 `docker-compose up`
 
 * ※たまにdbの起動が間に合わずに失敗するので、そのときは何度か施行してくださいmm
+
+### 2. create data
+
+* 初期データ作成用のSQLは ["/docker/db/manual/initialize_local_data.sql"](https://github.com/yuto-ohta/go-app-template/blob/master/docker/db/manual/initialize_local_data.sql) にあります。
+* MySQLクライアントなどを用いて、手動で適用してください
 
 ## ■Routing
 
