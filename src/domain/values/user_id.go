@@ -1,4 +1,4 @@
-package value
+package values
 
 type UserId struct {
 	id int

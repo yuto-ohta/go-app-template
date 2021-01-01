@@ -2,10 +2,10 @@ package repository
 
 import (
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/value"
+	"go-app-template/src/domain/values"
 )
 
 type UserRepository interface {
-	FindById(id value.UserId) (domain.User, error)
+	FindById(id values.UserId) (domain.User, error)
 	CreateUser(user domain.User) (domain.User, error)
 }

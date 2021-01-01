@@ -6,7 +6,7 @@ import (
 	"go-app-template/src/config"
 	"go-app-template/src/config/routes"
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/value"
+	"go-app-template/src/domain/values"
 	"go-app-template/src/errors"
 	"go-app-template/src/errors/messages"
 	"go-app-template/src/infrastructure"
@@ -55,7 +55,7 @@ func TestUserController_GetUser_正常にユーザーが取得できること(t 
 	// expected
 	expectedCode := http.StatusOK
 	// TODO: DB周りのテスト環境整備
-	expectedBody := *domain.NewUserWithUserId(*value.NewUserIdWithId(1), "まるお")
+	expectedBody := *domain.NewUserWithUserId(*values.NewUserIdWithId(1), "まるお")
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)
