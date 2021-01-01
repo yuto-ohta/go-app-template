@@ -10,7 +10,8 @@
     ├── domain
     ├── errors
     ├── infrastructure
-    └── usecase
+    ├── usecase
+    └── utils
 ```
 ## ■What is
 
@@ -37,3 +38,5 @@
 * [See Me](https://github.com/yuto-ohta/go-app-template/blob/051b1270883b7ee1b472902812d149bba9180387/src/config/routes/router.go#L24)
 * `http://localhost:1323/user/:id`
     * ユーザー取得
+* `http://localhost:1323/user/new?name=:userName`
+    * ユーザー登録
