@@ -18,6 +18,10 @@ func (e *AppError) Error() string {
 	return fmt.Sprintf("Error: %v,\nLocation: %v:%v", e.err.Error(), e.fileName, e.line)
 }
 
+func (e *AppError) ErrorWithoutLocation() string {
+	return fmt.Sprintf("Error: %v", e.err.Error())
+}
+
 func (e *AppError) GetHttpStatus() int {
 	return e.status
 }

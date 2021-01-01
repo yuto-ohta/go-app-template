@@ -1,3 +1,6 @@
 go-app-template
 docker/db/data
-*/tmp
+**/tmp
+
+# playground
+**/sample.go

@@ -1,10 +1,11 @@
 package infrastructure
 
 import (
+	"fmt"
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/value"
-	"go-app-template/src/errors"
+	appErrors "go-app-template/src/errors"
 	"go-app-template/src/infrastructure/model"
 	"gorm.io/gorm"
 	"net/http"
@@ -29,9 +30,24 @@ func (u UserRepositoryImpl) FindById(id value.UserId) (domain.User, error) {
 	user = *userModel.ToDomain()
 
 	if user.GetId().GetValue() == 0 {
-		err = errors.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
+		err = appErrors.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
 		return user, err
 	}
 
 	return user, nil
+}
+
+func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
+	userModel := model.User{Name: user.GetName()}
+	result := db.Conn.Create(&userModel)
+
+	if err := result.Error; err != nil {
+		return user, appErrors.NewAppError(err, http.StatusInternalServerError)
+	}
+	if rowsAffected := result.RowsAffected; rowsAffected != 1 {
+		return user, appErrors.NewAppError(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
+	}
+
+	createdUser := *userModel.ToDomain()
+	return createdUser, nil
 }

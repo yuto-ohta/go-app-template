@@ -11,7 +11,7 @@ type User struct {
 }
 
 func (u User) ToDomain() *domain.User {
-	id := value.NewUserId(u.ID)
+	id := value.NewUserIdWithId(u.ID)
 	name := u.Name
-	return domain.NewUser(*id, name)
+	return domain.NewUserWithUserId(*id, name)
 }
