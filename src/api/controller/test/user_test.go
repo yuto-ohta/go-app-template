@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go-app-template/src/config/routes"
 	"go-app-template/src/domain"
+	"go-app-template/src/domain/value"
 	"go-app-template/src/errors"
 	"go-app-template/src/errors/messages"
 	"net/http"
@@ -28,7 +29,7 @@ func TestUserController_userID_1でユーザーが取得できること(t *testi
 	// expected
 	expectedCode := http.StatusOK
 	// TODO: DB周りのテスト環境整備
-	expectedBody := *domain.NewUser(*domain.NewUserId(1), "taro")
+	expectedBody := *domain.NewUser(*value.NewUserId(1), "taro")
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)

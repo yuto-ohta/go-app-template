@@ -1,4 +1,4 @@
-package domain
+package value
 
 type UserId struct {
 	id int

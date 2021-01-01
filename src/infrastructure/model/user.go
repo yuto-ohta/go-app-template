@@ -1,6 +1,9 @@
 package model
 
-import "go-app-template/src/domain"
+import (
+	"go-app-template/src/domain"
+	"go-app-template/src/domain/value"
+)
 
 type User struct {
 	ID   int
@@ -8,7 +11,7 @@ type User struct {
 }
 
 func (u User) ToDomain() *domain.User {
-	id := domain.NewUserId(u.ID)
+	id := value.NewUserId(u.ID)
 	name := u.Name
 	return domain.NewUser(*id, name)
 }

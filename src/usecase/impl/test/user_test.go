@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go-app-template/src/config"
 	"go-app-template/src/domain"
+	"go-app-template/src/domain/value"
 	appErrors "go-app-template/src/errors"
 	"go-app-template/src/errors/test/mock"
 	"go-app-template/src/infrastructure"
@@ -31,7 +32,7 @@ func TestMain(m *testing.M) {
 
 func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testing.T) {
 	// setup
-	userId := domain.NewUserId(1)
+	userId := value.NewUserId(1)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual
@@ -50,7 +51,7 @@ func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testin
 
 func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返ること(t *testing.T) {
 	// setup
-	userId := domain.NewUserId(9999)
+	userId := value.NewUserId(9999)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual

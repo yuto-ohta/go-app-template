@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
+	"go-app-template/src/domain/value"
 	"go-app-template/src/errors"
 	"go-app-template/src/infrastructure/model"
 	"gorm.io/gorm"
@@ -16,7 +17,7 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
-func (u UserRepositoryImpl) FindById(id domain.UserId) (domain.User, error) {
+func (u UserRepositoryImpl) FindById(id value.UserId) (domain.User, error) {
 	var userModel model.User
 	var user domain.User
 	var err error

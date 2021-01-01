@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"go-app-template/src/domain"
+	"go-app-template/src/domain/value"
 )
 
 type UserUseCase interface {
-	FindById(id domain.UserId) (domain.User, error)
+	FindById(id value.UserId) (domain.User, error)
 }
