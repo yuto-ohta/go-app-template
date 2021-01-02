@@ -32,9 +32,7 @@
 
 `cd ${リポジトリのルート}`
 
-`docker-compose exec app ash`
-
-`/go-app-template/src # go run ./config/db/initialize/initialize_local_data.go` (コンテナ内で実行)
+`docker-compose exec app go run ./config/db/initialize/initialize_local_data.go`
 
 ## ■Routing
 
