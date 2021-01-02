@@ -2,11 +2,11 @@ package domain
 
 import (
 	"encoding/json"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 )
 
 type User struct {
-	id   values.UserId
+	id   valueobject.UserId
 	name string
 }
 
@@ -16,14 +16,14 @@ type userJSON struct {
 }
 
 func NewUser(name string) *User {
-	return &User{id: *values.NewUserId(), name: name}
+	return &User{id: *valueobject.NewUserId(), name: name}
 }
 
-func NewUserWithUserId(id values.UserId, name string) *User {
+func NewUserWithUserId(id valueobject.UserId, name string) *User {
 	return &User{id: id, name: name}
 }
 
-func (u User) GetId() values.UserId {
+func (u User) GetId() valueobject.UserId {
 	return u.id
 }
 
@@ -45,7 +45,7 @@ func (u *User) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	u.id = *values.NewUserIdWithId(userJSON.Id)
+	u.id = *valueobject.NewUserIdWithId(userJSON.Id)
 	u.name = userJSON.Name
 
 	return nil

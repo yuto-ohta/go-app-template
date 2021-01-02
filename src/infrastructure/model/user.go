@@ -2,7 +2,7 @@ package model
 
 import (
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 )
 
 type User struct {
@@ -11,7 +11,7 @@ type User struct {
 }
 
 func (u User) ToDomain() *domain.User {
-	id := values.NewUserIdWithId(u.ID)
+	id := valueobject.NewUserIdWithId(u.ID)
 	name := u.Name
 	return domain.NewUserWithUserId(*id, name)
 }

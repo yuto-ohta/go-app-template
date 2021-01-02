@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/repository"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 	appErrors "go-app-template/src/errors"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
-func (u UserUseCaseImpl) FindById(id values.UserId) (domain.User, error) {
+func (u UserUseCaseImpl) FindById(id valueobject.UserId) (domain.User, error) {
 	return u.userRepository.FindById(id)
 }
 

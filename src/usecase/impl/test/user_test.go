@@ -7,7 +7,7 @@ import (
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 	appErrors "go-app-template/src/errors"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase/impl"
@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 
 func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testing.T) {
 	// setup
-	userId := values.NewUserIdWithId(1)
+	userId := valueobject.NewUserIdWithId(1)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual
@@ -53,7 +53,7 @@ func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testin
 
 func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返ること(t *testing.T) {
 	// setup
-	userId := values.NewUserIdWithId(9999)
+	userId := valueobject.NewUserIdWithId(9999)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual
@@ -105,7 +105,7 @@ func TestUserUseCaseImpl_CreateUser_正常にユーザーが登録できるこ�
 func TestUserUseCaseImpl_CreateUser_すでにuserIdがある場合_登録できないこと(t *testing.T) {
 	// setup
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	userId := values.NewUserIdWithId(9999)
+	userId := valueobject.NewUserIdWithId(9999)
 	userName := "新規ユーザー太郎"
 	userDomain := domain.NewUserWithUserId(*userId, userName)
 

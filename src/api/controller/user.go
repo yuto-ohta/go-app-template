@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 	appErrors "go-app-template/src/errors"
 	"go-app-template/src/errors/messages"
 	"go-app-template/src/usecase"
@@ -36,7 +36,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	if id, err = getUserIdParam(c.Param("id")); err != nil {
 		return appErrors.ResponseErrorJSON(c, err, messages.InvalidUserId.String())
 	}
-	userId := values.NewUserIdWithId(id)
+	userId := valueobject.NewUserIdWithId(id)
 
 	// get user
 	var user domain.User

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/values"
+	"go-app-template/src/domain/valueobject"
 	appErrors "go-app-template/src/errors"
 	"go-app-template/src/infrastructure/model"
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
-func (u UserRepositoryImpl) FindById(id values.UserId) (domain.User, error) {
+func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error) {
 	var userModel model.User
 	var user domain.User
 	var err error
