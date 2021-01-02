@@ -2,10 +2,10 @@ package config
 
 import (
 	"encoding/json"
+	appUtils "go-app-template/src/utils"
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"runtime"
 )
 
 type configJSON struct {
@@ -16,12 +16,14 @@ var (
 	Properties configJSON
 )
 
+const configFileName = "config.json"
+
 func LoadConfig() {
 	Properties = getConfigJSON()
 }
 
 func getConfigJSON() configJSON {
-	configFilePath := getConfigFilePath()
+	configFilePath := appUtils.GetFilePathWithCurrentDir(configFileName)
 	b, err := ioutil.ReadFile(filepath.Clean(configFilePath))
 	if err != nil {
 		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())
@@ -33,16 +35,4 @@ func getConfigJSON() configJSON {
 	}
 
 	return configJSON
-}
-
-func getConfigFilePath() string {
-	const ConfigFileName = "config.json"
-	_, currentAbsPath, _, ok := runtime.Caller(0)
-	if !ok {
-		log.Fatal("設定ファイル読込エラー, 現在のパスの取得に失敗しました")
-	}
-
-	currentDir := filepath.Dir(currentAbsPath)
-	configFilePath := filepath.Join(currentDir, ConfigFileName)
-	return configFilePath
 }
