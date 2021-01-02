@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"go-app-template/src/config"
+	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/routes"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/values"
@@ -26,6 +27,7 @@ var (
 func TestMain(m *testing.M) {
 	// before all
 	config.LoadConfig()
+	localdata.InitializeLocalData()
 	userRepository := infrastructure.NewUserRepositoryImpl()
 	userUseCase = *impl.NewUserUseCaseImpl(userRepository)
 
@@ -35,6 +37,7 @@ func TestMain(m *testing.M) {
 	// after all
 
 	// finish test
+	localdata.InitializeLocalData()
 	os.Exit(code)
 }
 

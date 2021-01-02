@@ -1,4 +1,4 @@
-package main
+package localdata
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ const (
 	sqlSubStr   = ";"
 )
 
-func main() {
+func InitializeLocalData() {
 	fmt.Println("Initialize Local Data Start!!-----------------------------------")
 
 	// SQLファイルのパスを取得する
