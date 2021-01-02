@@ -30,8 +30,9 @@
 
 ### 2. create data
 
-* 初期データ作成用のSQLは ["/docker/db/manual/initialize_local_data.sql"](https://github.com/yuto-ohta/go-app-template/blob/master/docker/db/manual/initialize_local_data.sql) にあります。
-* MySQLクライアントなどを用いて、手動で適用してください
+`cd ${リポジトリのルート}`
+
+`go run ./src/config/db/initialize/initialize_local_data.go`
 
 ## ■Routing
 
