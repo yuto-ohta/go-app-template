@@ -7,7 +7,7 @@ import (
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
-	"go-app-template/src/config/routes"
+	"go-app-template/src/config/route"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/infrastructure"
@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 
 func TestUserController_GetUser_正常にユーザーが取得できること(t *testing.T) {
 	// setup
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	req := httptest.NewRequest("GET", "/user/1", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -67,7 +67,7 @@ func TestUserController_GetUser_正常にユーザーが取得できること(t 
 
 func TestUserController_GetUser_userIdに紐づくユーザーがいない場合_404が返ること(t *testing.T) {
 	// setup
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	req := httptest.NewRequest("GET", "/user/9999", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -94,7 +94,7 @@ func TestUserController_GetUser_userIdに紐づくユーザーがいない場合
 
 func TestUserController_GetUser_userIDが数字ではないとき_400が返ること(t *testing.T) {
 	// setup
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	req := httptest.NewRequest("GET", "/user/taro", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -122,7 +122,7 @@ func TestUserController_GetUser_userIDが数字ではないとき_400が返る�
 func TestUserController_CreateUser_正常にユーザーが登録されること(t *testing.T) {
 	// setup
 	userNameParam := "新規ユーザー太郎"
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", userNameParam), nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -149,7 +149,7 @@ func TestUserController_CreateUser_正常にユーザーが登録されること
 func TestUserController_CreateUser_userNameが存在しない場合_400エラーが返ること(t *testing.T) {
 	// setup
 	userNameParam := ""
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", userNameParam), nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -176,7 +176,7 @@ func TestUserController_CreateUser_userNameが存在しない場合_400エラー
 
 func TestUserController_CreateUser_userNameに半角_全角スペース_改行が含まれている場合_400エラーが返ること(t *testing.T) {
 	// setup
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	userNameParams := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎"}
 
 	// expected

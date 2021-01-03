@@ -2,7 +2,7 @@ package main
 
 import (
 	"go-app-template/src/config"
-	"go-app-template/src/config/routes"
+	"go-app-template/src/config/route"
 )
 
 func main() {
@@ -10,6 +10,6 @@ func main() {
 	config.LoadConfig()
 
 	// server run
-	router := routes.NewRouter()
+	router := route.NewRouter()
 	router.Logger.Fatal(router.Start(":1323"))
 }
