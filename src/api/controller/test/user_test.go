@@ -177,7 +177,7 @@ func TestUserController_CreateUser_userNameが存在しない場合_400エラー
 func TestUserController_CreateUser_userNameに半角_全角スペース_改行が含まれている場合_400エラーが返ること(t *testing.T) {
 	// setup
 	router := route.NewRouter()
-	userNameParams := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎"}
+	userNameParams := [...]string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎"}
 
 	// expected
 	expectedCode := http.StatusBadRequest
