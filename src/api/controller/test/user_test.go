@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"go-app-template/src/apperror"
-	"go-app-template/src/apperror/messages"
+	"go-app-template/src/apperror/message"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/routes"
@@ -84,7 +84,7 @@ func TestUserController_GetUser_userIdに紐づくユーザーがいない場合
 	// expected
 	expectedCode := http.StatusNotFound
 	expectedStatus := expectedCode
-	expectedMessage := messages.UserNotFound.String()
+	expectedMessage := message.UserNotFound.String()
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)
@@ -111,7 +111,7 @@ func TestUserController_GetUser_userIDが数字ではないとき_400が返る�
 	// expected
 	expectedCode := http.StatusBadRequest
 	expectedStatus := expectedCode
-	expectedMessage := messages.InvalidUserId.String()
+	expectedMessage := message.InvalidUserId.String()
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)
@@ -166,7 +166,7 @@ func TestUserController_CreateUser_userNameが存在しない場合_400エラー
 	// expected
 	expectedCode := http.StatusBadRequest
 	expectedStatus := expectedCode
-	expectedMessage := messages.InvalidUserName.String()
+	expectedMessage := message.InvalidUserName.String()
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)
@@ -182,7 +182,7 @@ func TestUserController_CreateUser_userNameに半角_全角スペース_改行�
 	// expected
 	expectedCode := http.StatusBadRequest
 	expectedStatus := expectedCode
-	expectedMessage := messages.InvalidUserName.String()
+	expectedMessage := message.InvalidUserName.String()
 
 	for _, param := range userNameParams {
 		param = appUtils.QueryEncoding(param)

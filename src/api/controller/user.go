@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-app-template/src/apperror"
-	"go-app-template/src/apperror/messages"
+	"go-app-template/src/apperror/message"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase"
@@ -34,7 +34,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get userId
 	var id int
 	if id, err = getUserIdParam(c.Param("id")); err != nil {
-		return apperror.ResponseErrorJSON(c, err, messages.InvalidUserId.String())
+		return apperror.ResponseErrorJSON(c, err, message.InvalidUserId.String())
 	}
 	userId := valueobject.NewUserIdWithId(id)
 
@@ -45,10 +45,10 @@ func (u UserController) GetUser(c echo.Context) error {
 	if err != nil {
 		// 該当のユーザーが存在しない場合
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
-			return apperror.ResponseErrorJSON(c, appErr, messages.UserNotFound.String())
+			return apperror.ResponseErrorJSON(c, appErr, message.UserNotFound.String())
 		}
 		// 予期せぬエラー
-		return apperror.ResponseErrorJSON(c, err, messages.SystemError.String())
+		return apperror.ResponseErrorJSON(c, err, message.SystemError.String())
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -66,7 +66,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	var userName string
 	userName, err = getUserNameParam(c.QueryParam("name"))
 	if err != nil {
-		return apperror.ResponseErrorJSON(c, err, messages.InvalidUserName.String())
+		return apperror.ResponseErrorJSON(c, err, message.InvalidUserName.String())
 	}
 
 	// new domain user
@@ -80,10 +80,10 @@ func (u UserController) CreateUser(c echo.Context) error {
 	if err != nil {
 		// ユーザー登録失敗
 		if errors.As(err, &appErr) {
-			return apperror.ResponseErrorJSON(c, appErr, messages.CreateUserFailed.String())
+			return apperror.ResponseErrorJSON(c, appErr, message.CreateUserFailed.String())
 		}
 		// 予期せぬエラー
-		return apperror.ResponseErrorJSON(c, err, messages.SystemError.String())
+		return apperror.ResponseErrorJSON(c, err, message.SystemError.String())
 	}
 
 	return c.JSON(http.StatusOK, user)
