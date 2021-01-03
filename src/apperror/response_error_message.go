@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"go-app-template/src/apperror/message"
 	"net/http"
 )
 
@@ -18,7 +19,7 @@ type responseErrorMessageJSON struct {
 	Message string
 }
 
-func ResponseErrorJSON(c echo.Context, err error, errMessage string) error {
+func ResponseErrorJSON(c echo.Context, err error, errMessage message.Message) error {
 	var httpStatus int
 	var appErr *AppError
 	// httpStatusを取得する
@@ -36,7 +37,7 @@ func ResponseErrorJSON(c echo.Context, err error, errMessage string) error {
 	fmt.Print("\n")
 
 	// Response
-	return c.JSON(httpStatus, newResponseErrorMessage(httpStatus, errMessage))
+	return c.JSON(httpStatus, newResponseErrorMessage(httpStatus, errMessage.String()))
 }
 
 func (r ResponseErrorMessage) MarshalJSON() ([]byte, error) {

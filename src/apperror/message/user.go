@@ -3,7 +3,7 @@ package message
 type User int
 
 const (
-	InvalidUserId User = iota
+	InvalidUserId User = iota + 1
 	UserNotFound
 	InvalidUserName
 	CreateUserFailed

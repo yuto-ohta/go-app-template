@@ -3,7 +3,7 @@ package message
 type System int
 
 const (
-	SystemError System = iota
+	SystemError System = iota + 1
 )
 
 func (s System) String() string {
