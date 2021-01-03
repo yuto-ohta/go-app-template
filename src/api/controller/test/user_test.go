@@ -3,13 +3,13 @@ package test
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"go-app-template/src/apperror"
+	"go-app-template/src/apperror/messages"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/routes"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
-	"go-app-template/src/errors"
-	"go-app-template/src/errors/messages"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase"
 	"go-app-template/src/usecase/impl"
@@ -74,7 +74,7 @@ func TestUserController_GetUser_userIdに紐づくユーザーがいない場合
 
 	// actual
 	actualCode := rec.Code
-	var actualBody errors.ResponseErrorMessage
+	var actualBody apperror.ResponseErrorMessage
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
 		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
@@ -101,7 +101,7 @@ func TestUserController_GetUser_userIDが数字ではないとき_400が返る�
 
 	// actual
 	actualCode := rec.Code
-	var actualBody errors.ResponseErrorMessage
+	var actualBody apperror.ResponseErrorMessage
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
 		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
@@ -156,7 +156,7 @@ func TestUserController_CreateUser_userNameが存在しない場合_400エラー
 
 	// actual
 	actualCode := rec.Code
-	var actualBody errors.ResponseErrorMessage
+	var actualBody apperror.ResponseErrorMessage
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
 		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
@@ -192,7 +192,7 @@ func TestUserController_CreateUser_userNameに半角_全角スペース_改行�
 
 		// actual
 		actualCode := rec.Code
-		var actualBody errors.ResponseErrorMessage
+		var actualBody apperror.ResponseErrorMessage
 		if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
 			t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 		}

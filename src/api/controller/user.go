@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"go-app-template/src/apperror"
+	"go-app-template/src/apperror/messages"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
-	appErrors "go-app-template/src/errors"
-	"go-app-template/src/errors/messages"
 	"go-app-template/src/usecase"
 	appUtils "go-app-template/src/utils"
 	"net/http"
@@ -34,21 +34,21 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get userId
 	var id int
 	if id, err = getUserIdParam(c.Param("id")); err != nil {
-		return appErrors.ResponseErrorJSON(c, err, messages.InvalidUserId.String())
+		return apperror.ResponseErrorJSON(c, err, messages.InvalidUserId.String())
 	}
 	userId := valueobject.NewUserIdWithId(id)
 
 	// get user
 	var user domain.User
 	user, err = u.userUseCase.FindById(*userId)
-	var appErr *appErrors.AppError
+	var appErr *apperror.AppError
 	if err != nil {
 		// 該当のユーザーが存在しない場合
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
-			return appErrors.ResponseErrorJSON(c, appErr, messages.UserNotFound.String())
+			return apperror.ResponseErrorJSON(c, appErr, messages.UserNotFound.String())
 		}
 		// 予期せぬエラー
-		return appErrors.ResponseErrorJSON(c, err, messages.SystemError.String())
+		return apperror.ResponseErrorJSON(c, err, messages.SystemError.String())
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -66,7 +66,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	var userName string
 	userName, err = getUserNameParam(c.QueryParam("name"))
 	if err != nil {
-		return appErrors.ResponseErrorJSON(c, err, messages.InvalidUserName.String())
+		return apperror.ResponseErrorJSON(c, err, messages.InvalidUserName.String())
 	}
 
 	// new domain user
@@ -76,14 +76,14 @@ func (u UserController) CreateUser(c echo.Context) error {
 	var user domain.User
 	user, err = u.userUseCase.CreateUser(userDomain)
 
-	var appErr *appErrors.AppError
+	var appErr *apperror.AppError
 	if err != nil {
 		// ユーザー登録失敗
 		if errors.As(err, &appErr) {
-			return appErrors.ResponseErrorJSON(c, appErr, messages.CreateUserFailed.String())
+			return apperror.ResponseErrorJSON(c, appErr, messages.CreateUserFailed.String())
 		}
 		// 予期せぬエラー
-		return appErrors.ResponseErrorJSON(c, err, messages.SystemError.String())
+		return apperror.ResponseErrorJSON(c, err, messages.SystemError.String())
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -94,7 +94,7 @@ func getUserIdParam(param string) (int, error) {
 
 	// 数字以外はNG
 	if err != nil {
-		appErr := appErrors.NewAppError(err, http.StatusBadRequest)
+		appErr := apperror.NewAppError(err, http.StatusBadRequest)
 		return 0, appErr
 	}
 
@@ -107,13 +107,13 @@ func getUserNameParam(param string) (string, error) {
 
 	// 空文字はNG
 	if param == "" {
-		appErr := appErrors.NewAppError(fmt.Errorf("\"userName\"が空文字になっています"), http.StatusBadRequest)
+		appErr := apperror.NewAppError(fmt.Errorf("\"userName\"が空文字になっています"), http.StatusBadRequest)
 		return "", appErr
 	}
 
 	// 半角・全角スペース, 改行を含む場合はNG
 	if appUtils.ContainsSpaces(param) {
-		appErr := appErrors.NewAppError(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
+		appErr := apperror.NewAppError(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
 		return "", appErr
 	}
 

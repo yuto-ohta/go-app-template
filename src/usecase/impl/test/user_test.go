@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"go-app-template/src/apperror"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
-	appErrors "go-app-template/src/errors"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase/impl"
 	"gorm.io/gorm"
@@ -57,14 +57,14 @@ func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返�
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual
-	var actualAppErr appErrors.AppError
+	var actualAppErr apperror.AppError
 	var actualErrStatus int
 
 	_, actualErr := target.FindById(*userId)
 	if actualErr == nil {
 		t.Error("エラーが発生していません。RecordNotFoundが返るはず")
 	}
-	var appErr *appErrors.AppError
+	var appErr *apperror.AppError
 	if errors.As(actualErr, &appErr) {
 		actualErrStatus = appErr.GetHttpStatus()
 		actualAppErr = *appErr
@@ -73,7 +73,7 @@ func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返�
 	}
 
 	// expected
-	expectedAppErr := appErrors.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
+	expectedAppErr := apperror.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
 	expectedErrStatus := expectedAppErr.GetHttpStatus()
 
 	// check
@@ -110,14 +110,14 @@ func TestUserUseCaseImpl_CreateUser_すでにuserIdがある場合_登録でき�
 	userDomain := domain.NewUserWithUserId(*userId, userName)
 
 	// actual
-	var actualAppErr appErrors.AppError
+	var actualAppErr apperror.AppError
 	var actualErrStatus int
 
 	_, err := target.CreateUser(*userDomain)
 	if err == nil {
 		t.Error("エラーが発生していません")
 	}
-	var appErr *appErrors.AppError
+	var appErr *apperror.AppError
 	if errors.As(err, &appErr) {
 		actualErrStatus = appErr.GetHttpStatus()
 		actualAppErr = *appErr
@@ -126,7 +126,7 @@ func TestUserUseCaseImpl_CreateUser_すでにuserIdがある場合_登録でき�
 	}
 
 	// expected
-	expectedAppErr := appErrors.NewAppError(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", *userDomain), http.StatusInternalServerError)
+	expectedAppErr := apperror.NewAppError(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", *userDomain), http.StatusInternalServerError)
 	expectedErrStatus := expectedAppErr.GetHttpStatus()
 
 	// check

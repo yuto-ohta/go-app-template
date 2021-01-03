@@ -2,10 +2,10 @@ package infrastructure
 
 import (
 	"fmt"
+	"go-app-template/src/apperror"
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
-	appErrors "go-app-template/src/errors"
 	"go-app-template/src/infrastructure/model"
 	"gorm.io/gorm"
 	"net/http"
@@ -30,7 +30,7 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	user = *userModel.ToDomain()
 
 	if user.GetId().GetValue() == 0 {
-		err = appErrors.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
+		err = apperror.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
 		return user, err
 	}
 
@@ -42,10 +42,10 @@ func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	result := db.Conn.Create(&userModel)
 
 	if err := result.Error; err != nil {
-		return user, appErrors.NewAppError(err, http.StatusInternalServerError)
+		return user, apperror.NewAppError(err, http.StatusInternalServerError)
 	}
 	if rowsAffected := result.RowsAffected; rowsAffected != 1 {
-		return user, appErrors.NewAppError(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
+		return user, apperror.NewAppError(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
 	}
 
 	createdUser := *userModel.ToDomain()
