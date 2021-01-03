@@ -19,7 +19,7 @@ RUN go mod download
 
 COPY . .
 
-# go mod downloadだとgo/binに入らないみたいなので個別にgo getする
+# go mod tidyで消えるので個別にgetする
 RUN go get -u github.com/kyoh86/richgo
 RUN go get github.com/pilu/fresh
 CMD ["fresh"]
