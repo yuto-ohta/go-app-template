@@ -19,9 +19,11 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 }
 
 func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error) {
-	var userModel model.User
-	var user domain.User
-	var err error
+	var (
+		userModel model.User
+		user      domain.User
+		err       error
+	)
 
 	if err = db.Conn.Raw("SELECT * FROM users WHERE id = ?", id.GetValue()).Scan(&userModel).Error; err != nil {
 		return user, err

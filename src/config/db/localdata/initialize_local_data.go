@@ -12,17 +12,17 @@ import (
 )
 
 const (
-	ddlFileName = "ddl.sql"
-	dmlFileName = "dml.sql"
-	sqlSubStr   = ";"
+	_ddlFileName = "ddl.sql"
+	_dmlFileName = "dml.sql"
+	_sqlSubStr   = ";"
 )
 
 func InitializeLocalData() {
 	fmt.Println("Initialize Local Data Start!!-----------------------------------")
 
 	// SQLファイルのパスを取得する
-	ddlFilePath := apputil.GetFilePathWithCurrentDir(ddlFileName)
-	dmlFileName := apputil.GetFilePathWithCurrentDir(dmlFileName)
+	ddlFilePath := apputil.GetFilePathWithCurrentDir(_ddlFileName)
+	dmlFileName := apputil.GetFilePathWithCurrentDir(_dmlFileName)
 
 	// SQLファイルを読み込む
 	ddlByteSlice, err := ioutil.ReadFile(filepath.Clean(ddlFilePath))
@@ -35,7 +35,7 @@ func InitializeLocalData() {
 	}
 
 	// ddl実行
-	ddlQueries := strings.Split(string(ddlByteSlice), sqlSubStr)
+	ddlQueries := strings.Split(string(ddlByteSlice), _sqlSubStr)
 	for _, q := range ddlQueries {
 		q = strings.TrimSpace(q)
 		// SQLファイルの末尾の空行がqueryに入ることがあるため,そのときはスキップする
@@ -53,7 +53,7 @@ func InitializeLocalData() {
 	}
 
 	// dml実行
-	dmlQueries := strings.Split(string(dmlByteSlice), sqlSubStr)
+	dmlQueries := strings.Split(string(dmlByteSlice), _sqlSubStr)
 	err = db.Conn.Transaction(func(tx *gorm.DB) error {
 		for _, q := range dmlQueries {
 			q = strings.TrimSpace(q)

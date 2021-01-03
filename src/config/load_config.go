@@ -16,14 +16,14 @@ var (
 	Properties configJSON
 )
 
-const configFileName = "config.json"
+const _configFileName = "config.json"
 
 func LoadConfig() {
 	Properties = getConfigJSON()
 }
 
 func getConfigJSON() configJSON {
-	configFilePath := apputil.GetFilePathWithCurrentDir(configFileName)
+	configFilePath := apputil.GetFilePathWithCurrentDir(_configFileName)
 	b, err := ioutil.ReadFile(filepath.Clean(configFilePath))
 	if err != nil {
 		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())

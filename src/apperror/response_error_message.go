@@ -20,8 +20,10 @@ type responseErrorMessageJSON struct {
 }
 
 func ResponseErrorJSON(c echo.Context, err error, errMessage message.Message) error {
-	var httpStatus int
-	var appErr *AppError
+	var (
+		httpStatus int
+		appErr     *AppError
+	)
 	// httpStatusを取得する
 	if errors.As(err, &appErr) {
 		httpStatus = appErr.GetHttpStatus()

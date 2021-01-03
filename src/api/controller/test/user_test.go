@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	userUseCase usecase.UserUseCase
+	_userUseCase usecase.UserUseCase
 )
 
 func TestMain(m *testing.M) {
@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	config.LoadConfig()
 	localdata.InitializeLocalData()
 	userRepository := infrastructure.NewUserRepositoryImpl()
-	userUseCase = *impl.NewUserUseCaseImpl(userRepository)
+	_userUseCase = *impl.NewUserUseCaseImpl(userRepository)
 
 	// run each test
 	code := m.Run()
@@ -128,18 +128,22 @@ func TestUserController_CreateUser_正常にユーザーが登録されること
 	router.ServeHTTP(rec, req)
 
 	// actual
-	var actualCode int
-	var actualBody domain.User
+	var (
+		actualCode int
+		actualBody domain.User
+	)
 	actualCode = rec.Code
 	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
 		t.Errorf("ResponseBodyがdomain.Userの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
 	}
 
 	// expected
-	var expectedCode int
-	var expectedBody domain.User
+	var (
+		expectedCode int
+		expectedBody domain.User
+	)
 	expectedCode = http.StatusOK
-	expectedBody, _ = userUseCase.FindById(actualBody.GetId())
+	expectedBody, _ = _userUseCase.FindById(actualBody.GetId())
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)

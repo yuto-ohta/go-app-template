@@ -4,10 +4,10 @@ type UserId struct {
 	id int
 }
 
-const notAllocated = -1
+const _notAllocated = -1
 
 func NewUserId() *UserId {
-	return &UserId{id: notAllocated}
+	return &UserId{id: _notAllocated}
 }
 
 func NewUserIdWithId(id int) *UserId {
@@ -19,5 +19,5 @@ func (u UserId) GetValue() int {
 }
 
 func (u UserId) IsAllocated() bool {
-	return u.id != notAllocated
+	return u.id != _notAllocated
 }

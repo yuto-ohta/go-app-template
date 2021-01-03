@@ -57,8 +57,10 @@ func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返�
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 
 	// actual
-	var actualAppErr apperror.AppError
-	var actualErrStatus int
+	var (
+		actualAppErr    apperror.AppError
+		actualErrStatus int
+	)
 
 	_, actualErr := target.FindById(*userId)
 	if actualErr == nil {
