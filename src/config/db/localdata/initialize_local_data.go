@@ -2,8 +2,8 @@ package localdata
 
 import (
 	"fmt"
+	"go-app-template/src/apputil"
 	"go-app-template/src/config/db"
-	appUtils "go-app-template/src/utils"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
@@ -21,8 +21,8 @@ func InitializeLocalData() {
 	fmt.Println("Initialize Local Data Start!!-----------------------------------")
 
 	// SQLファイルのパスを取得する
-	ddlFilePath := appUtils.GetFilePathWithCurrentDir(ddlFileName)
-	dmlFileName := appUtils.GetFilePathWithCurrentDir(dmlFileName)
+	ddlFilePath := apputil.GetFilePathWithCurrentDir(ddlFileName)
+	dmlFileName := apputil.GetFilePathWithCurrentDir(dmlFileName)
 
 	// SQLファイルを読み込む
 	ddlByteSlice, err := ioutil.ReadFile(filepath.Clean(ddlFilePath))

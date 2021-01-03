@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	appUtils "go-app-template/src/utils"
+	"go-app-template/src/apputil"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -23,7 +23,7 @@ func LoadConfig() {
 }
 
 func getConfigJSON() configJSON {
-	configFilePath := appUtils.GetFilePathWithCurrentDir(configFileName)
+	configFilePath := apputil.GetFilePathWithCurrentDir(configFileName)
 	b, err := ioutil.ReadFile(filepath.Clean(configFilePath))
 	if err != nil {
 		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())

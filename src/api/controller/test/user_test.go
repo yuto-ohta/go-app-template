@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
+	"go-app-template/src/apputil"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/route"
@@ -13,7 +14,6 @@ import (
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase"
 	"go-app-template/src/usecase/impl"
-	appUtils "go-app-template/src/utils"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -185,7 +185,7 @@ func TestUserController_CreateUser_userNameに半角_全角スペース_改行�
 	expectedMessage := message.InvalidUserName.String()
 
 	for _, param := range userNameParams {
-		param = appUtils.QueryEncoding(param)
+		param = apputil.QueryEncoding(param)
 		req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", param), nil)
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
