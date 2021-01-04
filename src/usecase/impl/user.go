@@ -1,7 +1,6 @@
 package impl
 
 import (
-	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/repository"
@@ -17,13 +16,16 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
-func (u UserUseCaseImpl) FindById(id valueobject.UserId) (domain.User, error) {
-	return u.userRepository.FindById(id)
+func (u UserUseCaseImpl) FindById(id int) (domain.User, error) {
+	userId := valueobject.NewUserIdWithId(id)
+	return u.userRepository.FindById(*userId)
 }
 
-func (u UserUseCaseImpl) CreateUser(user domain.User) (domain.User, error) {
-	if !user.IsValidForRegister() {
-		return user, apperror.NewAppErrorWithStatus(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", user), http.StatusInternalServerError)
+func (u UserUseCaseImpl) CreateUser(userName string) (domain.User, error) {
+	var user *domain.User
+	var err error
+	if user, err = domain.NewUser(userName); err != nil {
+		return *new(domain.User), apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
-	return u.userRepository.CreateUser(user)
+	return u.userRepository.CreateUser(*user)
 }

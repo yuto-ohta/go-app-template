@@ -46,18 +46,17 @@ func TestUserController_GetUser_正常にユーザーが取得できること(t 
 	req := httptest.NewRequest("GET", "/user/1", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
+	userId := 1
+	userName := "まるお"
 
 	// actual
 	actualCode := rec.Code
 	var actualBody domain.User
-	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("ResponseBodyがdomain.Userの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
-	}
+	actualBody.UnmarshalJSON(rec.Body.Bytes())
 
 	// expected
 	expectedCode := http.StatusOK
-	// TODO: DB周りのテスト環境整備
-	expectedBody := *domain.NewUserWithUserId(*valueobject.NewUserIdWithId(1), "まるお")
+	expectedBody := *domain.NewUserWithUserId(*valueobject.NewUserIdWithId(userId), userName)
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)
@@ -142,7 +141,7 @@ func TestUserController_CreateUser_正常にユーザーが登録されること
 		expectedBody domain.User
 	)
 	expectedCode = http.StatusOK
-	expectedBody, _ = _userUseCase.FindById(actualBody.GetId())
+	expectedBody, _ = _userUseCase.FindById(actualBody.GetId().GetValue())
 
 	// check
 	assert.Equal(t, expectedCode, actualCode)

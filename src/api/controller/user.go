@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/apputil"
 	"go-app-template/src/domain"
-	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase"
 	"net/http"
 	"strconv"
@@ -37,11 +35,10 @@ func (u UserController) GetUser(c echo.Context) error {
 	if id, err = getUserIdParam(c.Param("id")); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.InvalidUserId)
 	}
-	userId := valueobject.NewUserIdWithId(id)
 
 	// get user
 	var user domain.User
-	if user, err = u.userUseCase.FindById(*userId); err != nil {
+	if user, err = u.userUseCase.FindById(id); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
 	}
 
@@ -55,7 +52,6 @@ func (u UserController) GetUser(c echo.Context) error {
 */
 func (u UserController) CreateUser(c echo.Context) error {
 	var err error
-	var appErr *apperror.AppError
 
 	// get userName
 	var userName string
@@ -63,19 +59,10 @@ func (u UserController) CreateUser(c echo.Context) error {
 		return apperror.ResponseErrorJSON(c, err, message.InvalidUserName)
 	}
 
-	// new domain user
-	var userDomain *domain.User
-	if userDomain, err = domain.NewUser(userName); err != nil {
-		if errors.Is(err, appErr) {
-			return apperror.ResponseErrorJSON(c, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest), message.InvalidUserName)
-		}
-		return apperror.ResponseErrorJSON(c, err, message.SystemError)
-	}
-
-	// register user domain
+	// register user
 	var user domain.User
-	if user, err = u.userUseCase.CreateUser(*userDomain); err != nil {
-		return apperror.ResponseErrorJSON(c, appErr, message.CreateUserFailed)
+	if user, err = u.userUseCase.CreateUser(userName); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
 
 	return c.JSON(http.StatusOK, user)

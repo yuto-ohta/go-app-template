@@ -2,7 +2,6 @@ package test
 
 import (
 	"errors"
-	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/domain"
@@ -33,18 +32,16 @@ func TestMain(m *testing.M) {
 
 func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testing.T) {
 	// setup
-	userId := valueobject.NewUserIdWithId(1)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
+	userIdInt := 1
+	userName := "まるお"
 
 	// actual
-	actual, err := target.FindById(*userId)
-	if err != nil {
-		t.Errorf(fmt.Sprintf("ユーザー取得にエラーが発生しています, エラー: %v", err))
-	}
+	actual, _ := target.FindById(userIdInt)
 
 	// expected
-	// TODO: DB周りのテスト環境整備
-	expected := *domain.NewUserWithUserId(*userId, "まるお")
+	userId := valueobject.NewUserIdWithId(userIdInt)
+	expected := *domain.NewUserWithUserId(*userId, userName)
 
 	// check
 	assert.Equal(t, expected, actual)
@@ -52,25 +49,18 @@ func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testin
 
 func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返ること(t *testing.T) {
 	// setup
-	userId := valueobject.NewUserIdWithId(9999)
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
+	userIdInt := 9999
 
 	// actual
-	var (
-		actualAppErr    apperror.AppError
-		actualErrStatus int
-	)
+	var actualAppErr apperror.AppError
+	var actualErrStatus int
 
-	_, actualErr := target.FindById(*userId)
-	if actualErr == nil {
-		t.Error("エラーが発生していません。RecordNotFoundが返るはず")
-	}
+	_, actualErr := target.FindById(userIdInt)
 	var appErr *apperror.AppError
 	if errors.As(actualErr, &appErr) {
 		actualErrStatus = appErr.GetHttpStatus()
 		actualAppErr = *appErr
-	} else {
-		t.Error("エラーがAppErrorになっていません")
 	}
 
 	// expected
@@ -86,51 +76,13 @@ func TestUserUseCaseImpl_CreateUser_正常にユーザーが登録できるこ�
 	// setup
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 	userName := "新規ユーザー太郎"
-	userDomain, _ := domain.NewUser(userName)
 
 	// actual
-	var actualCreatedUser domain.User
-	var err error
-	actualCreatedUser, err = target.CreateUser(*userDomain)
-	if err != nil {
-		t.Errorf("ユーザー登録に失敗しています, Error: %v", err.Error())
-	}
+	actualCreatedUser, _ := target.CreateUser(userName)
 
 	// expected
-	expectedCreatedUser, _ := target.FindById(actualCreatedUser.GetId())
+	expectedCreatedUser, _ := target.FindById(actualCreatedUser.GetId().GetValue())
 
 	// check
 	assert.Equal(t, expectedCreatedUser, actualCreatedUser)
-}
-
-func TestUserUseCaseImpl_CreateUser_すでにuserIdがある場合_登録できないこと(t *testing.T) {
-	// setup
-	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	userId := valueobject.NewUserIdWithId(9999)
-	userName := "新規ユーザー太郎"
-	userDomain := domain.NewUserWithUserId(*userId, userName)
-
-	// actual
-	var actualAppErr apperror.AppError
-	var actualErrStatus int
-
-	_, err := target.CreateUser(*userDomain)
-	if err == nil {
-		t.Error("エラーが発生していません")
-	}
-	var appErr *apperror.AppError
-	if errors.As(err, &appErr) {
-		actualErrStatus = appErr.GetHttpStatus()
-		actualAppErr = *appErr
-	} else {
-		t.Error("エラーがAppErrorになっていません")
-	}
-
-	// expected
-	expectedAppErr := apperror.NewAppErrorWithStatus(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", *userDomain), http.StatusInternalServerError)
-	expectedErrStatus := expectedAppErr.GetHttpStatus()
-
-	// check
-	assert.Equal(t, expectedErrStatus, actualErrStatus)
-	assert.Equal(t, expectedAppErr.ErrorWithoutLocation(), actualAppErr.ErrorWithoutLocation())
 }
