@@ -1,0 +1,15 @@
+project_name: go-app-template
+development:
+  db_name: development
+  user: root
+  password: mysql
+  port_from: db
+  port_to: 3306
+  params: charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true
+development_without_docker:
+  db_name: development
+  user: root
+  password: mysql
+  port_from: localhost
+  port_to: 3306
+  params: charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true

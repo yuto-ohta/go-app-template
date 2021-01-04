@@ -1,38 +1,36 @@
 package config
 
 import (
-	"encoding/json"
 	"go-app-template/src/apputil"
 	"io/ioutil"
 	"log"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
-type configJSON struct {
-	ProjectName string
+const _configFileName = "config.yml"
+
+func GetConfig() map[interface{}]interface{} {
+	m := loadConfigFile()
+	res := make(map[interface{}]interface{}, len(m))
+	for k, v := range m {
+		res[k] = v
+	}
+	return res
 }
 
-var (
-	Properties configJSON
-)
-
-const _configFileName = "config.json"
-
-func LoadConfig() {
-	Properties = getConfigJSON()
-}
-
-func getConfigJSON() configJSON {
+func loadConfigFile() map[interface{}]interface{} {
 	configFilePath := apputil.GetFilePathWithCurrentDir(_configFileName)
 	b, err := ioutil.ReadFile(filepath.Clean(configFilePath))
 	if err != nil {
 		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())
 	}
 
-	var configJSON configJSON
-	if err := json.Unmarshal(b, &configJSON); err != nil {
-		log.Fatalf("設定ファイル読込エラー, 設定ファイルの構造がconfigJSONと異なっている可能性があります\nError: %v", err.Error())
+	m := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal(b, &m); err != nil {
+		log.Fatalf("設定ファイル読込エラー, Error: %v", err.Error())
 	}
 
-	return configJSON
+	return m
 }

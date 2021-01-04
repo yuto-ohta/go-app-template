@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"go-app-template/src/apperror"
-	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
@@ -20,7 +19,6 @@ import (
 
 func TestMain(m *testing.M) {
 	// before all
-	config.LoadConfig()
 	localdata.InitializeLocalData()
 
 	// run each test

@@ -5,7 +5,6 @@ import (
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/apputil"
-	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/route"
 	"go-app-template/src/domain"
@@ -27,7 +26,6 @@ var (
 
 func TestMain(m *testing.M) {
 	// before all
-	config.LoadConfig()
 	localdata.InitializeLocalData()
 	userRepository := infrastructure.NewUserRepositoryImpl()
 	_userUseCase = *impl.NewUserUseCaseImpl(userRepository)

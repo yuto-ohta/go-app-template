@@ -42,7 +42,7 @@ func getCallerData(skip int) (string, int) {
 		return "???", 0
 	}
 
-	projectName := config.Properties.ProjectName
+	projectName := config.GetConfig()["project_name"].(string)
 	fileProjectPath := fileAbsPath[strings.Index(fileAbsPath, projectName):]
 
 	return fileProjectPath, line
