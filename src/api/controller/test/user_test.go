@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/apputil"
@@ -18,6 +17,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (

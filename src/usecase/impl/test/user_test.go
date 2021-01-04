@@ -3,7 +3,6 @@ package test
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"go-app-template/src/apperror"
 	"go-app-template/src/config"
 	"go-app-template/src/config/db/localdata"
@@ -11,10 +10,12 @@ import (
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase/impl"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestMain(m *testing.M) {

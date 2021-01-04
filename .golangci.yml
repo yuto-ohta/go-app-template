@@ -7,8 +7,7 @@ issues:
 linters:
   enable:  # デフォルトで有効な linter は限られているため以下で有効化
     #    - godox  # TODO, FIXME などのコメントの検知, リリース前に有効にする
-    #    - goimports  # フォーマッタ(go fmt 相当も包含) https://godoc.org/golang.org/x/tools/cmd/goimports
-    - gofmt # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
+    - goimports  # フォーマッタ(go fmt 相当も包含) https://godoc.org/golang.org/x/tools/cmd/goimports
     - gosec  # セキュリティ系 https://github.com/securego/gosec
     - noctx  # net/http 系での Context 渡し忘れ https://github.com/sonatard/noctx
     - nolintlint  # nolint コメント自体の書き方 https://github.com/golangci/golangci-lint/tree/master/pkg/golinters/nolintlint

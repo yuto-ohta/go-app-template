@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"go-app-template/src/apputil"
 	"go-app-template/src/config/db"
-	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 const (

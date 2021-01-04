@@ -3,7 +3,6 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/apputil"
@@ -13,6 +12,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {

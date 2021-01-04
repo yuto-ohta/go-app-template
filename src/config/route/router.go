@@ -1,11 +1,12 @@
 package route
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"go-app-template/src/api/controller"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase/impl"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func NewRouter() *echo.Echo {

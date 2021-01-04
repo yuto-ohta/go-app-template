@@ -7,8 +7,9 @@ import (
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/infrastructure/model"
-	"gorm.io/gorm"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 type UserRepositoryImpl struct {
