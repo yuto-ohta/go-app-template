@@ -113,7 +113,7 @@ func getUserNameParam(param string) (string, error) {
 	}
 
 	// 半角・全角スペース, 改行を含む場合はNG
-	if apputil.ContainsSpaces(param) {
+	if apputil.ContainsSpace(param) {
 		appErr := apperror.NewAppError(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
 		return "", appErr
 	}

@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-func RemoveSpaces(str string) string {
+func RemoveSpace(str string) string {
 	return strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
 			// if the character is a space, drop it
@@ -18,7 +18,7 @@ func RemoveSpaces(str string) string {
 	}, str)
 }
 
-func ContainsSpaces(str string) bool {
+func ContainsSpace(str string) bool {
 	for _, r := range str {
 		if unicode.IsSpace(r) {
 			return true
