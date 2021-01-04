@@ -41,15 +41,8 @@ func (u UserController) GetUser(c echo.Context) error {
 
 	// get user
 	var user domain.User
-	user, err = u.userUseCase.FindById(*userId)
-	var appErr *apperror.AppError
-	if err != nil {
-		// 該当のユーザーが存在しない場合
-		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
-			return apperror.ResponseErrorJSON(c, appErr, message.UserNotFound)
-		}
-		// 予期せぬエラー
-		return apperror.ResponseErrorJSON(c, err, message.SystemError)
+	if user, err = u.userUseCase.FindById(*userId); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -62,29 +55,27 @@ func (u UserController) GetUser(c echo.Context) error {
 */
 func (u UserController) CreateUser(c echo.Context) error {
 	var err error
+	var appErr *apperror.AppError
 
 	// get userName
 	var userName string
-	userName, err = getUserNameParam(c.QueryParam("name"))
-	if err != nil {
+	if userName, err = getUserNameParam(c.QueryParam("name")); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.InvalidUserName)
 	}
 
 	// new domain user
-	userDomain := *domain.NewUser(userName)
+	var userDomain *domain.User
+	if userDomain, err = domain.NewUser(userName); err != nil {
+		if errors.Is(err, appErr) {
+			return apperror.ResponseErrorJSON(c, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest), message.InvalidUserName)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.SystemError)
+	}
 
 	// register user domain
 	var user domain.User
-	user, err = u.userUseCase.CreateUser(userDomain)
-
-	var appErr *apperror.AppError
-	if err != nil {
-		// ユーザー登録失敗
-		if errors.As(err, &appErr) {
-			return apperror.ResponseErrorJSON(c, appErr, message.CreateUserFailed)
-		}
-		// 予期せぬエラー
-		return apperror.ResponseErrorJSON(c, err, message.SystemError)
+	if user, err = u.userUseCase.CreateUser(*userDomain); err != nil {
+		return apperror.ResponseErrorJSON(c, appErr, message.CreateUserFailed)
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -95,7 +86,7 @@ func getUserIdParam(param string) (int, error) {
 
 	// 数字以外はNG
 	if err != nil {
-		appErr := apperror.NewAppError(err, http.StatusBadRequest)
+		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 		return 0, appErr
 	}
 
@@ -108,13 +99,13 @@ func getUserNameParam(param string) (string, error) {
 
 	// 空文字はNG
 	if param == "" {
-		appErr := apperror.NewAppError(fmt.Errorf("\"userName\"が空文字になっています"), http.StatusBadRequest)
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("\"userName\"が空文字になっています"), http.StatusBadRequest)
 		return "", appErr
 	}
 
 	// 半角・全角スペース, 改行を含む場合はNG
 	if apputil.ContainsSpace(param) {
-		appErr := apperror.NewAppError(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
 		return "", appErr
 	}
 

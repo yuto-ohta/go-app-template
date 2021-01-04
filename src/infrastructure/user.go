@@ -33,7 +33,7 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	user = *userModel.ToDomain()
 
 	if user.GetId().GetValue() == 0 {
-		err = apperror.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
+		err = apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
 		return user, err
 	}
 
@@ -45,10 +45,10 @@ func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	result := db.Conn.Create(&userModel)
 
 	if err := result.Error; err != nil {
-		return user, apperror.NewAppError(err, http.StatusInternalServerError)
+		return user, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 	if rowsAffected := result.RowsAffected; rowsAffected != 1 {
-		return user, apperror.NewAppError(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
+		return user, apperror.NewAppErrorWithStatus(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
 	}
 
 	createdUser := *userModel.ToDomain()

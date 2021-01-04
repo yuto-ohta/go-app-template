@@ -1,10 +1,15 @@
 package apperror
 
 import (
+	"errors"
 	"fmt"
 	"go-app-template/src/config"
 	"runtime"
 	"strings"
+)
+
+const (
+	_notEvaluated = -1
 )
 
 type AppError struct {
@@ -15,18 +20,51 @@ type AppError struct {
 }
 
 func (e *AppError) Error() string {
-	return fmt.Sprintf("Error: %v,\nLocation: %v:%v", e.err.Error(), e.fileName, e.line)
+	wrappedError := e.err
+
+	// 内側がappErrorである限り、ループする
+	var appErr *AppError
+	if errors.As(wrappedError, &appErr) {
+		return appErr.Error()
+	}
+
+	// 内側が一番下の普通のerrorになったときに、プリントする
+	return fmt.Sprintf("Error: %v,\nLocation: %v:%v", wrappedError.Error(), e.fileName, e.line)
 }
 
 func (e *AppError) ErrorWithoutLocation() string {
-	return fmt.Sprintf("Error: %v", e.err.Error())
+	wrappedError := e.err
+
+	// 内側がappErrorである限り、ループする
+	var appErr *AppError
+	if errors.As(wrappedError, &appErr) {
+		return appErr.Error()
+	}
+
+	// 内側が一番下の普通のerrorになったときに、プリントする
+	return fmt.Sprintf("Error: %v", wrappedError.Error())
 }
 
-func (e *AppError) GetHttpStatus() int {
-	return e.status
+func (e AppError) Is(target error) bool {
+	_, ok := target.(*AppError)
+	return ok
 }
 
-func NewAppError(err error, status int) *AppError {
+func (e AppError) Unwrap() error {
+	return e.err
+}
+
+func NewAppError(err error) *AppError {
+	fileName, line := getCallerData(2)
+	return &AppError{
+		err:      err,
+		status:   _notEvaluated,
+		fileName: fileName,
+		line:     line,
+	}
+}
+
+func NewAppErrorWithStatus(err error, status int) *AppError {
 	fileName, line := getCallerData(2)
 	return &AppError{
 		err:      err,
@@ -34,6 +72,14 @@ func NewAppError(err error, status int) *AppError {
 		fileName: fileName,
 		line:     line,
 	}
+}
+
+func (e AppError) GetHttpStatus() int {
+	return e.status
+}
+
+func (e AppError) isStatusEvaluated() bool {
+	return e.status != _notEvaluated
 }
 
 func getCallerData(skip int) (string, int) {

@@ -2,7 +2,14 @@ package domain
 
 import (
 	"encoding/json"
+	"go-app-template/src/apperror"
 	"go-app-template/src/domain/valueobject"
+
+	"github.com/go-playground/validator/v10"
+)
+
+var (
+	validate = validator.New()
 )
 
 type User struct {
@@ -15,8 +22,11 @@ type userJSON struct {
 	Name string
 }
 
-func NewUser(name string) *User {
-	return &User{id: *valueobject.NewUserId(), name: name}
+func NewUser(name string) (*User, error) {
+	if isValid, err := isValidName(name); !isValid {
+		return nil, apperror.NewAppError(err)
+	}
+	return &User{id: *valueobject.NewUserId(), name: name}, nil
 }
 
 func NewUserWithUserId(id valueobject.UserId, name string) *User {
@@ -53,4 +63,13 @@ func (u *User) UnmarshalJSON(b []byte) error {
 
 func (u User) IsValidForRegister() bool {
 	return !u.GetId().IsAllocated()
+}
+
+func isValidName(name string) (bool, error) {
+	rules := "min=1,max=8"
+	err := validate.Var(name, rules)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

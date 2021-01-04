@@ -25,12 +25,14 @@ func ResponseErrorJSON(c echo.Context, err error, errMessage message.Message) er
 		httpStatus int
 		appErr     *AppError
 	)
+
 	// httpStatusを取得する
-	if errors.As(err, &appErr) {
+	if errors.As(err, &appErr) && appErr.isStatusEvaluated() {
 		httpStatus = appErr.GetHttpStatus()
 	} else {
-		// appErr以外はすべて想定外とする
+		// 予期せぬエラー
 		httpStatus = http.StatusInternalServerError
+		errMessage = message.SystemError
 	}
 
 	// ログにエラー内容を書き出し

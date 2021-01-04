@@ -74,7 +74,7 @@ func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返�
 	}
 
 	// expected
-	expectedAppErr := apperror.NewAppError(gorm.ErrRecordNotFound, http.StatusNotFound)
+	expectedAppErr := apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
 	expectedErrStatus := expectedAppErr.GetHttpStatus()
 
 	// check
@@ -86,7 +86,7 @@ func TestUserUseCaseImpl_CreateUser_正常にユーザーが登録できるこ�
 	// setup
 	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 	userName := "新規ユーザー太郎"
-	userDomain := domain.NewUser(userName)
+	userDomain, _ := domain.NewUser(userName)
 
 	// actual
 	var actualCreatedUser domain.User
@@ -127,7 +127,7 @@ func TestUserUseCaseImpl_CreateUser_すでにuserIdがある場合_登録でき�
 	}
 
 	// expected
-	expectedAppErr := apperror.NewAppError(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", *userDomain), http.StatusInternalServerError)
+	expectedAppErr := apperror.NewAppErrorWithStatus(fmt.Errorf("未登録のユーザーにuserIdが割り当てられています, user: %v", *userDomain), http.StatusInternalServerError)
 	expectedErrStatus := expectedAppErr.GetHttpStatus()
 
 	// check
