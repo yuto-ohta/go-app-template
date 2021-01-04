@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	// server run
+	// run server
 	router := route.NewRouter()
 	router.Logger.Fatal(router.Start(":1323"))
 }
