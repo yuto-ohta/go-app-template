@@ -2,6 +2,7 @@ package test
 
 import (
 	"errors"
+	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/domain"
@@ -13,7 +14,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
+)
+
+var (
+	_target = impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 )
 
 func TestMain(m *testing.M) {
@@ -30,59 +34,114 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestUserUseCaseImpl_FindById_userIdでユーザーが返ること(t *testing.T) {
+func TestUserUseCaseImpl_TestFindById_正常系(t *testing.T) {
 	// setup
-	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	userIdInt := 1
-	userName := "まるお"
-
-	// actual
-	actual, _ := target.FindById(userIdInt)
-
-	// expected
-	userId := valueobject.NewUserIdWithId(userIdInt)
-	expected := *domain.NewUserWithUserId(*userId, userName)
-
-	// check
-	assert.Equal(t, expected, actual)
-}
-
-func TestUserUseCaseImpl_FindById_存在しないuserIdでRecordNotFoundが返ること(t *testing.T) {
-	// setup
-	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	userIdInt := 9999
-
-	// actual
-	var actualAppErr apperror.AppError
-	var actualErrStatus int
-
-	_, actualErr := target.FindById(userIdInt)
-	var appErr *apperror.AppError
-	if errors.As(actualErr, &appErr) {
-		actualErrStatus = appErr.GetHttpStatus()
-		actualAppErr = *appErr
+	var params = []struct {
+		inputUserIdInt   int
+		expectedUserName string
+	}{
+		{1, "まるお"},
 	}
 
-	// expected
-	expectedAppErr := apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
-	expectedErrStatus := expectedAppErr.GetHttpStatus()
+	for _, p := range params {
+		// actual
+		actual, _ := _target.FindById(p.inputUserIdInt)
 
-	// check
-	assert.Equal(t, expectedErrStatus, actualErrStatus)
-	assert.Equal(t, expectedAppErr.ErrorWithoutLocation(), actualAppErr.ErrorWithoutLocation())
+		// expected
+		userId, _ := valueobject.NewUserIdWithId(p.inputUserIdInt)
+		expected, _ := domain.NewUserWithUserId(*userId, p.expectedUserName)
+
+		// check
+		assert.Equal(t, *expected, actual)
+	}
 }
 
-func TestUserUseCaseImpl_CreateUser_正常にユーザーが登録できること(t *testing.T) {
+func TestUserUseCaseImpl_FindById_異常系(t *testing.T) {
 	// setup
-	target := impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
-	userName := "新規ユーザー太郎"
+	var params = []struct {
+		title              string
+		inputUserIdInt     int
+		expectedErrStr     string
+		expectedHttpStatus int
+	}{
+		{"存在しないuserIdはNG", 9999, "Error: record not found", http.StatusNotFound},
+	}
 
-	// actual
-	actualCreatedUser, _ := target.CreateUser(userName)
+	for _, p := range params {
+		// actual
+		var (
+			actualAppErr    *apperror.AppError
+			actualErrStr    string
+			actualErrStatus int
+		)
+		_, actualErr := _target.FindById(p.inputUserIdInt)
+		if errors.As(actualErr, &actualAppErr) {
+			actualErrStr = actualAppErr.ErrorWithoutLocation()
+			actualErrStatus = actualAppErr.GetHttpStatus()
+		}
 
-	// expected
-	expectedCreatedUser, _ := target.FindById(actualCreatedUser.GetId().GetValue())
+		// expected
+		expectedErrStr := p.expectedErrStr
+		expectedErrStatus := p.expectedHttpStatus
 
-	// check
-	assert.Equal(t, expectedCreatedUser, actualCreatedUser)
+		// check
+		fmt.Println(p.title)
+		assert.Equal(t, expectedErrStatus, actualErrStatus)
+		assert.Equal(t, expectedErrStr, actualErrStr)
+	}
+}
+
+func TestUserUseCaseImpl_CreateUser_正常系(t *testing.T) {
+	// setup
+	var params = []struct {
+		inputUserName string
+	}{
+		{"新規ユーザー太郎"},
+	}
+
+	for _, p := range params {
+		// actual
+		actualCreatedUser, _ := _target.CreateUser(p.inputUserName)
+
+		// expected
+		expectedCreatedUser, _ := _target.FindById(actualCreatedUser.GetId().GetValue())
+
+		// check
+		assert.Equal(t, expectedCreatedUser, actualCreatedUser)
+	}
+}
+
+func TestUserUseCaseImpl_CreateUser_異常系(t *testing.T) {
+	// setup
+	var params = []struct {
+		title              string
+		inputUserName      string
+		expectedErrStr     string
+		expectedHttpStatus int
+	}{
+		{"９文字以上のユーザー名はNG", "123456789", "Error: Key: '' Error:Field validation for '' failed on the 'max' tag", http.StatusBadRequest},
+	}
+
+	for _, p := range params {
+		// actual
+		var (
+			actualAppErr    *apperror.AppError
+			actualErrStr    string
+			actualErrStatus int
+		)
+		_, actualErr := _target.CreateUser(p.inputUserName)
+		if errors.As(actualErr, &actualAppErr) {
+			actualErrStr = actualAppErr.ErrorWithoutLocation()
+			actualErrStatus = actualAppErr.GetHttpStatus()
+		}
+
+		// expected
+		expectedErrStr := p.expectedErrStr
+		expectedErrStatus := p.expectedHttpStatus
+
+		// check
+		fmt.Println(p.title)
+		assert.Equal(t, expectedErrStatus, actualErrStatus)
+		assert.Equal(t, expectedErrStr, actualErrStr)
+	}
 }

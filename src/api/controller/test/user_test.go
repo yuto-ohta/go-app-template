@@ -10,8 +10,8 @@ import (
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/infrastructure"
-	"go-app-template/src/usecase"
 	"go-app-template/src/usecase/impl"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,14 +21,26 @@ import (
 )
 
 var (
-	_userUseCase usecase.UserUseCase
+	_target      = route.NewRouter()
+	_userUseCase = *impl.NewUserUseCaseImpl(infrastructure.NewUserRepositoryImpl())
 )
+
+type input struct {
+	httpMethod string
+	path       string
+	body       io.Reader
+}
+
+type errorCheckParam struct {
+	title           string
+	input           []input
+	expectedCode    int
+	expectedMessage message.Message
+}
 
 func TestMain(m *testing.M) {
 	// before all
 	localdata.InitializeLocalData()
-	userRepository := infrastructure.NewUserRepositoryImpl()
-	_userUseCase = *impl.NewUserUseCaseImpl(userRepository)
 
 	// run each test
 	code := m.Run()
@@ -40,170 +52,181 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestUserController_GetUser_正常にユーザーが取得できること(t *testing.T) {
+func TestUserController_GetUser_正常系(t *testing.T) {
 	// setup
-	router := route.NewRouter()
-	req := httptest.NewRequest("GET", "/user/1", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-	userId := 1
-	userName := "まるお"
-
-	// actual
-	actualCode := rec.Code
-	var actualBody domain.User
-	actualBody.UnmarshalJSON(rec.Body.Bytes())
-
-	// expected
-	expectedCode := http.StatusOK
-	expectedBody := *domain.NewUserWithUserId(*valueobject.NewUserIdWithId(userId), userName)
-
-	// check
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedBody, actualBody)
-}
-
-func TestUserController_GetUser_userIdに紐づくユーザーがいない場合_404が返ること(t *testing.T) {
-	// setup
-	router := route.NewRouter()
-	req := httptest.NewRequest("GET", "/user/9999", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	// actual
-	actualCode := rec.Code
-	var actualBody apperror.ResponseErrorMessage
-	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
-	}
-	actualStatus := actualBody.GetStatus()
-	actualMessage := actualBody.GetMessage()
-
-	// expected
-	expectedCode := http.StatusNotFound
-	expectedStatus := expectedCode
-	expectedMessage := message.UserNotFound.String()
-
-	// check
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedStatus, actualStatus)
-	assert.Equal(t, expectedMessage, actualMessage)
-}
-
-func TestUserController_GetUser_userIDが数字ではないとき_400が返ること(t *testing.T) {
-	// setup
-	router := route.NewRouter()
-	req := httptest.NewRequest("GET", "/user/taro", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	// actual
-	actualCode := rec.Code
-	var actualBody apperror.ResponseErrorMessage
-	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
-	}
-	actualStatus := actualBody.GetStatus()
-	actualMessage := actualBody.GetMessage()
-
-	// expected
-	expectedCode := http.StatusBadRequest
-	expectedStatus := expectedCode
-	expectedMessage := message.InvalidUserId.String()
-
-	// check
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedStatus, actualStatus)
-	assert.Equal(t, expectedMessage, actualMessage)
-}
-
-func TestUserController_CreateUser_正常にユーザーが登録されること(t *testing.T) {
-	// setup
-	userNameParam := "新規ユーザー太郎"
-	router := route.NewRouter()
-	req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", userNameParam), nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	// actual
-	var (
-		actualCode int
-		actualBody domain.User
-	)
-	actualCode = rec.Code
-	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("ResponseBodyがdomain.Userの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
+	var params = []struct {
+		title             string
+		input             input
+		expectedCode      int
+		expectedUserIdInt int
+		expectedName      string
+	}{
+		{
+			"正常にユーザーが取得できること",
+			input{httpMethod: "GET", path: "/user/1", body: nil},
+			http.StatusOK,
+			1,
+			"まるお",
+		},
 	}
 
-	// expected
-	var (
-		expectedCode int
-		expectedBody domain.User
-	)
-	expectedCode = http.StatusOK
-	expectedBody, _ = _userUseCase.FindById(actualBody.GetId().GetValue())
-
-	// check
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedBody, actualBody)
-}
-
-func TestUserController_CreateUser_userNameが存在しない場合_400エラーが返ること(t *testing.T) {
-	// setup
-	userNameParam := ""
-	router := route.NewRouter()
-	req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", userNameParam), nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	// actual
-	actualCode := rec.Code
-	var actualBody apperror.ResponseErrorMessage
-	if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-		t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
-	}
-	actualStatus := actualBody.GetStatus()
-	actualMessage := actualBody.GetMessage()
-
-	// expected
-	expectedCode := http.StatusBadRequest
-	expectedStatus := expectedCode
-	expectedMessage := message.InvalidUserName.String()
-
-	// check
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedStatus, actualStatus)
-	assert.Equal(t, expectedMessage, actualMessage)
-}
-
-func TestUserController_CreateUser_userNameに半角_全角スペース_改行が含まれている場合_400エラーが返ること(t *testing.T) {
-	// setup
-	router := route.NewRouter()
-	userNameParams := [...]string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎"}
-
-	// expected
-	expectedCode := http.StatusBadRequest
-	expectedStatus := expectedCode
-	expectedMessage := message.InvalidUserName.String()
-
-	for _, param := range userNameParams {
-		param = apputil.QueryEncoding(param)
-		req := httptest.NewRequest("GET", fmt.Sprintf("/user/new?name=%v", param), nil)
+	for _, p := range params {
+		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
 		rec := httptest.NewRecorder()
-		router.ServeHTTP(rec, req)
+		_target.ServeHTTP(rec, req)
 
 		// actual
 		actualCode := rec.Code
-		var actualBody apperror.ResponseErrorMessage
-		if err := actualBody.UnmarshalJSON(rec.Body.Bytes()); err != nil {
-			t.Errorf("ResponseBodyがerrors.ResponseErrorMessageの構造と合致していません, Error: %v, ResponseBody: %v", err.Error(), rec.Body.String())
-		}
-		actualStatus := actualBody.GetStatus()
-		actualMessage := actualBody.GetMessage()
+		var actualBody domain.User
+		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
+
+		// expected
+		id, _ := valueobject.NewUserIdWithId(p.expectedUserIdInt)
+		expectedCode := p.expectedCode
+		expectedBody, _ := domain.NewUserWithUserId(*id, p.expectedName)
 
 		// check
+		fmt.Println(p.title)
 		assert.Equal(t, expectedCode, actualCode)
-		assert.Equal(t, expectedStatus, actualStatus)
-		assert.Equal(t, expectedMessage, actualMessage)
+		assert.Equal(t, *expectedBody, actualBody)
 	}
+}
+
+func TestUserController_GetUser_異常系(t *testing.T) {
+	// setup
+	var params = []errorCheckParam{
+		{
+			"存在しないuserIdのとき、404になること",
+			[]input{{httpMethod: "GET", path: "/user/9999", body: nil}},
+			http.StatusNotFound,
+			message.UserNotFound,
+		},
+		{
+			"userIdが数字ではないとき、400になること",
+			[]input{{httpMethod: "GET", path: "/user/hogehoge", body: nil}},
+			http.StatusBadRequest,
+			message.InvalidUserId,
+		},
+		{
+			"userIdがマイナスのとき、400になること",
+			[]input{{httpMethod: "GET", path: "/user/-1", body: nil}},
+			http.StatusBadRequest,
+			message.InvalidUserId,
+		},
+	}
+
+	// check
+	doErrorCheck(t, params)
+}
+
+func TestUserController_CreateUser_正常系(t *testing.T) {
+	// setup
+	var params = []struct {
+		title        string
+		input        input
+		expectedCode int
+		expectedName string
+	}{
+		{
+			"正常にユーザーが登録されること",
+			input{httpMethod: "GET", path: "/user/new?name=新規ユーザー太郎", body: nil},
+			http.StatusOK,
+			"新規ユーザー太郎",
+		},
+		{
+			"userNameの両端に半角・全角スペースがあるとき、スペースが取り除かれ、ユーザーが登録されること",
+			input{httpMethod: "GET", path: fmt.Sprintf("/user/new?name=%v", apputil.QueryEncoding(" 　 　新規ユーザー太郎 　 　")), body: nil},
+			http.StatusOK,
+			"新規ユーザー太郎",
+		},
+	}
+
+	for _, p := range params {
+		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
+		rec := httptest.NewRecorder()
+		_target.ServeHTTP(rec, req)
+
+		// actual
+		actualCode := rec.Code
+		var actualBody domain.User
+		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
+		actualName := actualBody.GetName()
+
+		// expected
+		expectedCode := p.expectedCode
+		expectedBody, _ := _userUseCase.FindById(actualBody.GetId().GetValue())
+		expectedName := p.expectedName
+
+		// check
+		fmt.Println(p.title)
+		assert.Equal(t, expectedCode, actualCode)
+		assert.Equal(t, expectedBody, actualBody)
+		assert.Equal(t, expectedName, actualName)
+	}
+}
+func TestUserController_CreateUser_異常系(t *testing.T) {
+	// setup
+	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー\n太郎　"}
+
+	var params = []errorCheckParam{
+		{
+			"userNameが空文字のとき、400になること",
+			[]input{{httpMethod: "GET", path: "/user/new?name=", body: nil}},
+			http.StatusBadRequest,
+			message.InvalidUserName,
+		},
+		{
+			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
+			makeInputs("GET", "/user/new?name=", userNames, nil),
+			http.StatusBadRequest,
+			message.InvalidUserName,
+		},
+		{
+			"userNameが9文字以上のとき、400になること",
+			[]input{{httpMethod: "GET", path: "/user/new?name=123456789", body: nil}},
+			http.StatusBadRequest,
+			message.InvalidUserName,
+		},
+	}
+
+	// check
+	doErrorCheck(t, params)
+}
+
+func doErrorCheck(t *testing.T, params []errorCheckParam) {
+	for _, p := range params {
+		for _, ip := range p.input {
+			req := httptest.NewRequest(ip.httpMethod, ip.path, ip.body)
+			rec := httptest.NewRecorder()
+			_target.ServeHTTP(rec, req)
+
+			// actual
+			actualCode := rec.Code
+			var actualBody apperror.ResponseErrorMessage
+			_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
+			actualMessage := actualBody.GetMessage()
+
+			// expected
+			expectedCode := p.expectedCode
+			expectedMessage := p.expectedMessage.String()
+
+			// check
+			fmt.Println(p.title)
+			assert.Equal(t, expectedCode, actualCode)
+			assert.Equal(t, expectedMessage, actualMessage)
+		}
+	}
+}
+
+func makeInputs(httpMethod string, pathBase string, pathParams []string, body io.Reader) []input {
+	inputs := make([]input, len(pathParams))
+	for i, p := range pathParams {
+		input := &input{
+			httpMethod: httpMethod,
+			path:       fmt.Sprintf("%v%v", pathBase, apputil.QueryEncoding(p)),
+			body:       body,
+		}
+		inputs[i] = *input
+	}
+	return inputs
 }
