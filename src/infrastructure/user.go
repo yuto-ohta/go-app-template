@@ -22,35 +22,46 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error) {
 	var (
 		userModel model.User
-		user      domain.User
+		user      *domain.User
 		err       error
 	)
 
+	// SQL実行
 	if err = db.Conn.Raw("SELECT * FROM users WHERE id = ?", id.GetValue()).Scan(&userModel).Error; err != nil {
-		return user, err
+		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
-	user = *userModel.ToDomain()
-
-	if user.GetId().GetValue() == 0 {
-		err = apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
-		return user, err
+	// NotFoundのエラーハンドリング
+	if userModel.ID == 0 {
+		return domain.User{}, apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
 	}
 
-	return user, nil
+	// domainに変換
+	if user, err = userModel.ToDomain(); err != nil {
+		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	return *user, nil
 }
 
 func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
+	var err error
 	userModel := model.User{Name: user.GetName()}
-	result := db.Conn.Create(&userModel)
 
-	if err := result.Error; err != nil {
+	// SQL実行
+	result := db.Conn.Create(&userModel)
+	if err = result.Error; err != nil {
 		return user, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 	if rowsAffected := result.RowsAffected; rowsAffected != 1 {
 		return user, apperror.NewAppErrorWithStatus(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
 	}
 
-	createdUser := *userModel.ToDomain()
-	return createdUser, nil
+	// domainに変換
+	var createdUser *domain.User
+	if createdUser, err = userModel.ToDomain(); err != nil {
+		return user, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	return *createdUser, nil
 }

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/labstack/echo/v4"
 )
@@ -77,6 +78,12 @@ func getUserIdParam(param string) (int, error) {
 		return 0, appErr
 	}
 
+	// 0以下はNG
+	if id <= 0 {
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("userIdは1以上を指定してください, userId: %v", id), http.StatusBadRequest)
+		return 0, appErr
+	}
+
 	return id, nil
 }
 
@@ -86,13 +93,19 @@ func getUserNameParam(param string) (string, error) {
 
 	// 空文字はNG
 	if param == "" {
-		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("\"userName\"が空文字になっています"), http.StatusBadRequest)
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"が空文字になっています, userName: %v`, param), http.StatusBadRequest)
 		return "", appErr
 	}
 
 	// 半角・全角スペース, 改行を含む場合はNG
 	if apputil.ContainsSpace(param) {
-		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("\"userName\"に半角・全角スペース, 改行コードが含まれています"), http.StatusBadRequest)
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"に半角・全角スペース, 改行コードが含まれています, userName: %v`, param), http.StatusBadRequest)
+		return "", appErr
+	}
+
+	// 9文字以上はNG
+	if utf8.RuneCountInString(param) > 8 {
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`userNameは最大8文字までです, userName: %v`, param), http.StatusBadRequest)
 		return "", appErr
 	}
 

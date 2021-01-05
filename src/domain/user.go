@@ -23,14 +23,19 @@ type userJSON struct {
 }
 
 func NewUser(name string) (*User, error) {
-	if isValid, err := isValidName(name); !isValid {
+	user := &User{id: *valueobject.NewUserId(), name: name}
+	if err := user.IsValidResErr(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
-	return &User{id: *valueobject.NewUserId(), name: name}, nil
+	return user, nil
 }
 
-func NewUserWithUserId(id valueobject.UserId, name string) *User {
-	return &User{id: id, name: name}
+func NewUserWithUserId(id valueobject.UserId, name string) (*User, error) {
+	user := &User{id: id, name: name}
+	if err := user.IsValidResErr(); err != nil {
+		return nil, apperror.NewAppError(err)
+	}
+	return user, nil
 }
 
 func (u User) GetId() valueobject.UserId {
@@ -50,26 +55,38 @@ func (u User) MarshalJSON() ([]byte, error) {
 }
 
 func (u *User) UnmarshalJSON(b []byte) error {
+	var err error
+
 	var userJSON userJSON
-	if err := json.Unmarshal(b, &userJSON); err != nil {
+	if err = json.Unmarshal(b, &userJSON); err != nil {
 		return err
 	}
 
-	u.id = *valueobject.NewUserIdWithId(userJSON.Id)
-	u.name = userJSON.Name
+	var id *valueobject.UserId
+	if id, err = valueobject.NewUserIdWithId(userJSON.Id); err != nil {
+		return err
+	}
 
+	u.id = *id
+	u.name = userJSON.Name
 	return nil
 }
 
-func (u User) IsValidForRegister() bool {
-	return !u.GetId().IsAllocated()
+func (u User) IsValidResErr() error {
+	if err := u.isValidNameResErr(); err != nil {
+		return apperror.NewAppError(err)
+	}
+	if err := u.id.IsValidResErr(); err != nil {
+		return apperror.NewAppError(err)
+	}
+
+	return u.GetId().IsValidResErr()
 }
 
-func isValidName(name string) (bool, error) {
+func (u User) isValidNameResErr() error {
 	rules := "min=1,max=8"
-	err := validate.Var(name, rules)
-	if err != nil {
-		return false, err
+	if err := validate.Var(u.name, rules); err != nil {
+		return apperror.NewAppError(err)
 	}
-	return true, nil
+	return nil
 }
