@@ -38,7 +38,7 @@ func (e *AppError) ErrorWithoutLocation() string {
 	// 内側がappErrorである限り、ループする
 	var appErr *AppError
 	if errors.As(wrappedError, &appErr) {
-		return appErr.Error()
+		return appErr.ErrorWithoutLocation()
 	}
 
 	// 内側が一番下の普通のerrorになったときに、プリントする
