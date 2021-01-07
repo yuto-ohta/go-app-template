@@ -36,8 +36,10 @@
 
 ## ■Routing
 
-* [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/routes/router.go)
-* `http://localhost:1323/user/:id`
+* [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
+* GET: `http://localhost:1323/user/:id`
     * ユーザー取得
-* `http://localhost:1323/user/new?name=:userName`
+* GET: `http://localhost:1323/user/new?name=:userName`
     * ユーザー登録
+* DELETE: `http://localhost:1323/user/:id`
+    * ユーザー削除
