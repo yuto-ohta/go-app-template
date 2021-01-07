@@ -12,9 +12,11 @@ const (
 	_notEvaluated = -1
 )
 
+type HttpStatus int
+
 type AppError struct {
 	err      error
-	status   int
+	status   HttpStatus
 	fileName string
 	line     int
 }
@@ -64,7 +66,7 @@ func NewAppError(err error) *AppError {
 	}
 }
 
-func NewAppErrorWithStatus(err error, status int) *AppError {
+func NewAppErrorWithStatus(err error, status HttpStatus) *AppError {
 	fileName, line := getCallerData(2)
 	return &AppError{
 		err:      err,
@@ -74,12 +76,18 @@ func NewAppErrorWithStatus(err error, status int) *AppError {
 	}
 }
 
-func (e AppError) GetHttpStatus() int {
+func (e AppError) GetHttpStatus() HttpStatus {
+	// httpStatusがない && 内側がappErrorである限り, ループする
+	var appErr *AppError
+	if !e.status.isEvaluated() && errors.As(e.err, &appErr) {
+		return appErr.GetHttpStatus()
+	}
+
 	return e.status
 }
 
-func (e AppError) isStatusEvaluated() bool {
-	return e.status != _notEvaluated
+func (s HttpStatus) isEvaluated() bool {
+	return s != _notEvaluated
 }
 
 func getCallerData(skip int) (string, int) {
