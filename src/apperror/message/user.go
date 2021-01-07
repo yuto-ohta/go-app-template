@@ -7,6 +7,7 @@ const (
 	UserNotFound
 	InvalidUserName
 	CreateUserFailed
+	DeleteUserFailed
 )
 
 func (u User) String() string {
@@ -15,6 +16,7 @@ func (u User) String() string {
 		UserNotFound:     "対象のユーザーが見つかりません",
 		InvalidUserName:  "ユーザー名の形式が間違っています",
 		CreateUserFailed: "ユーザー登録に失敗しました",
+		DeleteUserFailed: "ユーザー削除に失敗しました",
 	}
 	return messages[u]
 }

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
@@ -64,6 +65,33 @@ func (u UserController) CreateUser(c echo.Context) error {
 	var user domain.User
 	if user, err = u.userUseCase.CreateUser(userName); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
+/*
+	ユーザーを削除する
+	@path_param id: userId
+	@return user
+*/
+func (u UserController) DeleteUser(c echo.Context) error {
+	var err error
+
+	// get userId
+	var id int
+	if id, err = getUserIdParam(c.Param("id")); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.InvalidUserId)
+	}
+
+	// delete user
+	var user domain.User
+	var appErr *apperror.AppError
+	if user, err = u.userUseCase.DeleteUser(id); err != nil {
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
+			return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.DeleteUserFailed)
 	}
 
 	return c.JSON(http.StatusOK, user)

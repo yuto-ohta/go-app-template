@@ -11,6 +11,13 @@ type User struct {
 	Name string
 }
 
+func NewUserModel(user domain.User) User {
+	return User{
+		ID:   user.GetId().GetValue(),
+		Name: user.GetName(),
+	}
+}
+
 func (u User) ToDomain() (*domain.User, error) {
 	var (
 		err    error

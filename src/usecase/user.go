@@ -7,4 +7,5 @@ import (
 type UserUseCase interface {
 	FindById(id int) (domain.User, error)
 	CreateUser(userName string) (domain.User, error)
+	DeleteUser(id int) (domain.User, error)
 }

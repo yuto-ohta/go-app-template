@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
@@ -61,4 +60,22 @@ func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	}
 
 	return *createdUser, nil
+}
+
+func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, error) {
+	var err error
+
+	// get user
+	var user domain.User
+	if user, err = u.FindById(id); err != nil {
+		return domain.User{}, apperror.NewAppError(err)
+	}
+
+	// SQL実行
+	result := db.Conn.Delete(&model.User{}, id.GetValue())
+	if err = result.Error; err != nil {
+		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	return user, nil
 }
