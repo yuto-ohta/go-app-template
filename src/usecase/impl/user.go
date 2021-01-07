@@ -27,17 +27,10 @@ func (u UserUseCaseImpl) FindById(id int) (domain.User, error) {
 }
 
 func (u UserUseCaseImpl) CreateUser(userName string) (domain.User, error) {
-	var (
-		user   *domain.User
-		err    error
-		appErr *apperror.AppError
-	)
-
+	var user *domain.User
+	var err error
 	if user, err = domain.NewUser(userName); err != nil {
-		if errors.Is(err, appErr) {
-			return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
-		}
-		return domain.User{}, apperror.NewAppError(err)
+		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	return u.userRepository.CreateUser(*user)

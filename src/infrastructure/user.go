@@ -53,9 +53,6 @@ func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	if err = result.Error; err != nil {
 		return user, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
-	if rowsAffected := result.RowsAffected; rowsAffected != 1 {
-		return user, apperror.NewAppErrorWithStatus(fmt.Errorf("INSERT文のRowsAffectedが1以外になっています, RowsAffected: %v", rowsAffected), http.StatusInternalServerError)
-	}
 
 	// domainに変換
 	var createdUser *domain.User
