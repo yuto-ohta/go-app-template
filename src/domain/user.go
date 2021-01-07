@@ -24,7 +24,7 @@ type userJSON struct {
 
 func NewUser(name string) (*User, error) {
 	user := &User{id: *valueobject.NewUserId(), name: name}
-	if err := user.IsValidResErr(); err != nil {
+	if err := user.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 	return user, nil
@@ -32,7 +32,7 @@ func NewUser(name string) (*User, error) {
 
 func NewUserWithUserId(id valueobject.UserId, name string) (*User, error) {
 	user := &User{id: id, name: name}
-	if err := user.IsValidResErr(); err != nil {
+	if err := user.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 	return user, nil
@@ -72,18 +72,15 @@ func (u *User) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (u User) IsValidResErr() error {
-	if err := u.isValidNameResErr(); err != nil {
-		return apperror.NewAppError(err)
-	}
-	if err := u.id.IsValidResErr(); err != nil {
+func (u User) Validate() error {
+	if err := u.validateName(); err != nil {
 		return apperror.NewAppError(err)
 	}
 
-	return u.GetId().IsValidResErr()
+	return u.GetId().Validate()
 }
 
-func (u User) isValidNameResErr() error {
+func (u User) validateName() error {
 	rules := "min=1,max=8"
 	if err := validate.Var(u.name, rules); err != nil {
 		return apperror.NewAppError(err)

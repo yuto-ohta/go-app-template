@@ -24,7 +24,7 @@ func NewUserId() *UserId {
 
 func NewUserIdWithId(id int) (*UserId, error) {
 	userId := &UserId{id: id}
-	if err := userId.IsValidResErr(); err != nil {
+	if err := userId.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 	return userId, nil
@@ -34,7 +34,7 @@ func (u UserId) GetValue() int {
 	return u.id
 }
 
-func (u UserId) IsValidResErr() error {
+func (u UserId) Validate() error {
 	if u.isAllocated() {
 		rules := "gte=1"
 		err := validate.Var(u.id, rules)
