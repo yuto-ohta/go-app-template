@@ -193,6 +193,75 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+func TestUserController_DeleteUser_正常系(t *testing.T) {
+	// setup
+	var resCheckParams = []struct {
+		title             string
+		input             input
+		expectedCode      int
+		expectedUserIdInt int
+		expectedName      string
+	}{
+		{
+			"正常にユーザーが削除できること①_レスポンスチェック",
+			input{httpMethod: "DELETE", path: "/user/1", body: nil},
+			http.StatusOK,
+			1,
+			"まるお",
+		},
+	}
+
+	var recordCheckParams = []errorCheckParam{
+		{
+			"正常にユーザーが削除できること②_レコードチェック",
+			[]input{{httpMethod: "GET", path: "/user/1", body: nil}},
+			http.StatusNotFound,
+			message.UserNotFound,
+		},
+	}
+
+	// resCheck
+	for _, p := range resCheckParams {
+		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
+		rec := httptest.NewRecorder()
+		_target.ServeHTTP(rec, req)
+
+		// actual
+		actualCode := rec.Code
+		var actualBody domain.User
+		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
+
+		// expected
+		id, _ := valueobject.NewUserIdWithId(p.expectedUserIdInt)
+		expectedCode := p.expectedCode
+		expectedBody, _ := domain.NewUserWithUserId(*id, p.expectedName)
+
+		// check
+		fmt.Println(p.title)
+
+		assert.Equal(t, expectedCode, actualCode)
+		assert.Equal(t, *expectedBody, actualBody)
+	}
+
+	// recordCheck
+	doErrorCheck(t, recordCheckParams)
+}
+
+func TestUserController_DeleteUser_異常系(t *testing.T) {
+	// setup
+	var params = []errorCheckParam{
+		{
+			"存在しないuserIdのとき、404になること",
+			[]input{{httpMethod: "DELETE", path: "/user/9999", body: nil}},
+			http.StatusNotFound,
+			message.UserNotFound,
+		},
+	}
+
+	// check
+	doErrorCheck(t, params)
+}
+
 func doErrorCheck(t *testing.T, params []errorCheckParam) {
 	for _, p := range params {
 		for _, ip := range p.input {
