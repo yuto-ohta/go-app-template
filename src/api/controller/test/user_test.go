@@ -67,7 +67,7 @@ func TestUserController_GetUser_正常系(t *testing.T) {
 	}{
 		{
 			"正常にユーザーが取得できること",
-			input{httpMethod: "GET", path: "/user/1", body: nil},
+			input{httpMethod: http.MethodGet, path: "/user/1", body: nil},
 			http.StatusOK,
 			1,
 			"まるお",
@@ -101,19 +101,19 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 	var params = []errorCheckParam{
 		{
 			"存在しないuserIdのとき、404になること",
-			[]input{{httpMethod: "GET", path: "/user/9999", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/9999", body: nil}},
 			http.StatusNotFound,
 			message.UserNotFound,
 		},
 		{
 			"userIdが数字ではないとき、400になること",
-			[]input{{httpMethod: "GET", path: "/user/hogehoge", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/hogehoge", body: nil}},
 			http.StatusBadRequest,
 			message.InvalidUserId,
 		},
 		{
 			"userIdがマイナスのとき、400になること",
-			[]input{{httpMethod: "GET", path: "/user/-1", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/-1", body: nil}},
 			http.StatusBadRequest,
 			message.InvalidUserId,
 		},
@@ -133,13 +133,13 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 	}{
 		{
 			"正常にユーザーが登録されること",
-			input{httpMethod: "GET", path: "/user/new?name=新規ユーザー太郎", body: nil},
+			input{httpMethod: http.MethodGet, path: "/user/new?name=新規ユーザー太郎", body: nil},
 			http.StatusOK,
 			"新規ユーザー太郎",
 		},
 		{
 			"userNameの両端に半角・全角スペースがあるとき、スペースが取り除かれ、ユーザーが登録されること",
-			input{httpMethod: "GET", path: fmt.Sprintf("/user/new?name=%v", apputil.QueryEncoding(" 　 　新規ユーザー太郎 　 　")), body: nil},
+			input{httpMethod: http.MethodGet, path: fmt.Sprintf("/user/new?name=%v", apputil.QueryEncoding(" 　 　新規ユーザー太郎 　 　")), body: nil},
 			http.StatusOK,
 			"新規ユーザー太郎",
 		},
@@ -178,19 +178,19 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 	var params = []errorCheckParam{
 		{
 			"userNameが空文字のとき、400になること",
-			[]input{{httpMethod: "GET", path: "/user/new?name=", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/new?name=", body: nil}},
 			http.StatusBadRequest,
 			message.InvalidUserName,
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeQueryParamInputs("GET", "/user/new?name=", userNames, nil),
+			makeQueryParamInputs(http.MethodGet, "/user/new?name=", userNames, nil),
 			http.StatusBadRequest,
 			message.InvalidUserName,
 		},
 		{
 			"userNameが9文字以上のとき、400になること",
-			[]input{{httpMethod: "GET", path: "/user/new?name=123456789", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/new?name=123456789", body: nil}},
 			http.StatusBadRequest,
 			message.InvalidUserName,
 		},
@@ -214,7 +214,7 @@ func TestUserController_DeleteUser_正常系(t *testing.T) {
 	}{
 		{
 			"正常にユーザーが削除できること①_レスポンスチェック",
-			input{httpMethod: "DELETE", path: "/user/1", body: nil},
+			input{httpMethod: http.MethodDelete, path: "/user/1", body: nil},
 			http.StatusOK,
 			1,
 			"まるお",
@@ -224,7 +224,7 @@ func TestUserController_DeleteUser_正常系(t *testing.T) {
 	var recordCheckParams = []errorCheckParam{
 		{
 			"正常にユーザーが削除できること②_レコードチェック",
-			[]input{{httpMethod: "GET", path: "/user/1", body: nil}},
+			[]input{{httpMethod: http.MethodGet, path: "/user/1", body: nil}},
 			http.StatusNotFound,
 			message.UserNotFound,
 		},
@@ -265,7 +265,7 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 	var params = []errorCheckParam{
 		{
 			"存在しないuserIdのとき、404になること",
-			[]input{{httpMethod: "DELETE", path: "/user/9999", body: nil}},
+			[]input{{httpMethod: http.MethodDelete, path: "/user/9999", body: nil}},
 			http.StatusNotFound,
 			message.UserNotFound,
 		},
