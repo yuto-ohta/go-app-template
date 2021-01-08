@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
@@ -9,8 +10,6 @@ import (
 	"go-app-template/src/apputil"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/route"
-	"go-app-template/src/domain"
-	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/infrastructure"
 	"go-app-template/src/usecase/impl"
 	"io"
@@ -35,12 +34,27 @@ type input struct {
 	body       io.Reader
 }
 
+type statusOKCheckParam struct {
+	title             string
+	input             input
+	expectedUserIdInt int
+	expectedName      string
+}
+
 type errorCheckParam struct {
 	title           string
 	input           []input
 	expectedCode    int
 	expectedMessage message.Message
 }
+
+type RecordCheckPattern int
+
+const (
+	DoNothing RecordCheckPattern = iota + 1
+	ExistingCheck
+	NotExistingCheck
+)
 
 func TestMain(m *testing.M) {
 	// before all
@@ -58,42 +72,18 @@ func TestMain(m *testing.M) {
 
 func TestUserController_GetUser_正常系(t *testing.T) {
 	// setup
-	var params = []struct {
-		title             string
-		input             input
-		expectedCode      int
-		expectedUserIdInt int
-		expectedName      string
-	}{
+	var params = []statusOKCheckParam{
 		{
+
 			"正常にユーザーが取得できること",
 			input{httpMethod: http.MethodGet, path: "/user/1", body: nil},
-			http.StatusOK,
 			1,
 			"まるお",
 		},
 	}
 
-	for _, p := range params {
-		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-		rec := httptest.NewRecorder()
-		_target.ServeHTTP(rec, req)
-
-		// actual
-		actualCode := rec.Code
-		var actualBody domain.User
-		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
-
-		// expected
-		id, _ := valueobject.NewUserIdWithId(p.expectedUserIdInt)
-		expectedCode := p.expectedCode
-		expectedBody, _ := domain.NewUserWithUserId(*id, p.expectedName)
-
-		// check
-		fmt.Println(p.title)
-		assert.Equal(t, expectedCode, actualCode)
-		assert.Equal(t, *expectedBody, actualBody)
-	}
+	// check
+	doStatusOKCheck(t, params, ExistingCheck)
 }
 
 func TestUserController_GetUser_異常系(t *testing.T) {
@@ -125,51 +115,25 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 
 func TestUserController_CreateUser_正常系(t *testing.T) {
 	// setup
-	var params = []struct {
-		title        string
-		input        input
-		expectedCode int
-		expectedName string
-	}{
+	const initializedLocalDataRecordCounts = 10
+	expectedUserIdInt := initializedLocalDataRecordCounts + 1
+	var params = []statusOKCheckParam{
 		{
 			"正常にユーザーが登録されること",
 			input{httpMethod: http.MethodGet, path: "/user/new?name=新規ユーザー太郎", body: nil},
-			http.StatusOK,
+			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
 		{
 			"userNameの両端に半角・全角スペースがあるとき、スペースが取り除かれ、ユーザーが登録されること",
 			input{httpMethod: http.MethodGet, path: fmt.Sprintf("/user/new?name=%v", apputil.QueryEncoding(" 　 　新規ユーザー太郎 　 　")), body: nil},
-			http.StatusOK,
+			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
 	}
 
-	for _, p := range params {
-		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-		rec := httptest.NewRecorder()
-		_target.ServeHTTP(rec, req)
-
-		// actual
-		actualCode := rec.Code
-		var actualBody domain.User
-		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
-		actualName := actualBody.GetName()
-
-		// expected
-		expectedCode := p.expectedCode
-		expectedBody, _ := _userUseCase.FindById(actualBody.GetId().GetValue())
-		expectedName := p.expectedName
-
-		// check
-		fmt.Println(p.title)
-		assert.Equal(t, expectedCode, actualCode)
-		assert.Equal(t, expectedBody, actualBody)
-		assert.Equal(t, expectedName, actualName)
-
-		// clean
-		localdata.InitializeLocalData()
-	}
+	// check
+	doStatusOKCheck(t, params, ExistingCheck)
 }
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
@@ -198,66 +162,21 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 
 	// check
 	doErrorCheck(t, params)
-
-	// clean
-	localdata.InitializeLocalData()
 }
 
 func TestUserController_DeleteUser_正常系(t *testing.T) {
 	// setup
-	var resCheckParams = []struct {
-		title             string
-		input             input
-		expectedCode      int
-		expectedUserIdInt int
-		expectedName      string
-	}{
+	var params = []statusOKCheckParam{
 		{
 			"正常にユーザーが削除できること①_レスポンスチェック",
 			input{httpMethod: http.MethodDelete, path: "/user/1", body: nil},
-			http.StatusOK,
 			1,
 			"まるお",
 		},
 	}
 
-	var recordCheckParams = []errorCheckParam{
-		{
-			"正常にユーザーが削除できること②_レコードチェック",
-			[]input{{httpMethod: http.MethodGet, path: "/user/1", body: nil}},
-			http.StatusNotFound,
-			message.UserNotFound,
-		},
-	}
-
-	// resCheck
-	for _, p := range resCheckParams {
-		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-		rec := httptest.NewRecorder()
-		_target.ServeHTTP(rec, req)
-
-		// actual
-		actualCode := rec.Code
-		var actualBody domain.User
-		_ = actualBody.UnmarshalJSON(rec.Body.Bytes())
-
-		// expected
-		id, _ := valueobject.NewUserIdWithId(p.expectedUserIdInt)
-		expectedCode := p.expectedCode
-		expectedBody, _ := domain.NewUserWithUserId(*id, p.expectedName)
-
-		// check
-		fmt.Println(p.title)
-
-		assert.Equal(t, expectedCode, actualCode)
-		assert.Equal(t, *expectedBody, actualBody)
-	}
-
-	// recordCheck
-	doErrorCheck(t, recordCheckParams)
-
-	// clean
-	localdata.InitializeLocalData()
+	// check
+	doStatusOKCheck(t, params, NotExistingCheck)
 }
 
 func TestUserController_DeleteUser_異常系(t *testing.T) {
@@ -273,58 +192,21 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 
 	// check
 	doErrorCheck(t, params)
-
-	// clean
-	localdata.InitializeLocalData()
 }
 
 func TestUserController_UpdateUser_正常系(t *testing.T) {
 	// setup
-	var resCheckParams = []struct {
-		title             string
-		input             input
-		expectedCode      int
-		expectedUserIdInt int
-		expectedName      string
-	}{
+	var params = []statusOKCheckParam{
 		{
 			"正常にユーザー名が更新できること",
 			input{httpMethod: http.MethodPost, path: "/user/1/update", body: strings.NewReader(`{"id":1,"name":"ハルキゲニア"}`)},
-			http.StatusOK,
 			1,
 			"ハルキゲニア",
 		},
 	}
 
-	for _, p := range resCheckParams {
-		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		_target.ServeHTTP(rec, req)
-
-		// actual
-		actualCode := rec.Code
-		var actualBody dto.UserDto
-		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
-		actualRecordDomain, _ := _userUseCase.FindById(p.expectedUserIdInt)
-		actualRecordDto := actualRecordDomain.ToDto()
-
-		// expected
-		expectedCode := p.expectedCode
-		expectedBody := &dto.UserDto{
-			Id:   p.expectedUserIdInt,
-			Name: p.expectedName,
-		}
-
-		// check
-		fmt.Println(p.title)
-		assert.Equal(t, expectedCode, actualCode)
-		assert.Equal(t, *expectedBody, actualBody)
-		assert.Equal(t, expectedBody, actualRecordDto)
-
-		// clean
-		localdata.InitializeLocalData()
-	}
+	// check
+	doStatusOKCheck(t, params, ExistingCheck)
 }
 
 func TestUserController_UpdateUser_異常系(t *testing.T) {
@@ -366,9 +248,47 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 
 	// check
 	doErrorCheck(t, params)
+}
 
-	// clean
-	localdata.InitializeLocalData()
+func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPattern RecordCheckPattern) {
+	for _, p := range params {
+		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
+		if p.input.httpMethod == http.MethodPost {
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		}
+		rec := httptest.NewRecorder()
+		_target.ServeHTTP(rec, req)
+
+		// actual
+		actualCode := rec.Code
+		var actualBody dto.UserDto
+		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
+
+		// expected
+		expectedCode := http.StatusOK
+		expectedBody := &dto.UserDto{
+			Id:   p.expectedUserIdInt,
+			Name: p.expectedName,
+		}
+
+		// check①
+		fmt.Println(p.title)
+		assert.Equal(t, expectedCode, actualCode)
+		assert.Equal(t, *expectedBody, actualBody)
+
+		// check② レコード存在チェック
+		switch recordCheckPattern {
+		case DoNothing:
+		case ExistingCheck:
+			actualRecord, _ := _userUseCase.FindById(p.expectedUserIdInt)
+			assert.Equal(t, *expectedBody, actualRecord)
+		case NotExistingCheck:
+			doRecordNotExistingCheck(t, p.expectedUserIdInt)
+		}
+
+		// clean
+		localdata.InitializeLocalData()
+	}
 }
 
 func doErrorCheck(t *testing.T, params []errorCheckParam) {
@@ -395,8 +315,31 @@ func doErrorCheck(t *testing.T, params []errorCheckParam) {
 			fmt.Println(p.title)
 			assert.Equal(t, expectedCode, actualCode)
 			assert.Equal(t, expectedMessage, actualMessage)
+
+			// clean
+			localdata.InitializeLocalData()
 		}
 	}
+}
+
+func doRecordNotExistingCheck(t *testing.T, recordId int) {
+	// actual
+	_, actualErr := _userUseCase.FindById(recordId)
+	var actualErrCode int
+	var actualErrMessage string
+	var appErr *apperror.AppError
+	if errors.As(actualErr, &appErr) {
+		actualErrCode = int(appErr.GetHttpStatus())
+		actualErrMessage = appErr.ErrorWithoutLocation()
+	}
+
+	// expected
+	const expectedErrCode = http.StatusNotFound
+	const expectedErrMessage = "Error: record not found"
+
+	// check
+	assert.Equal(t, expectedErrCode, actualErrCode)
+	assert.Equal(t, expectedErrMessage, actualErrMessage)
 }
 
 func makeQueryParamInputs(httpMethod string, pathBase string, pathParams []string, body io.Reader) []input {
