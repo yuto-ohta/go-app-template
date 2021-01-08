@@ -38,7 +38,11 @@ func (u UserController) GetUser(c echo.Context) error {
 	// get user
 	var user dto.UserDto
 	if user, err = u.userUseCase.FindById(id); err != nil {
-		return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
+		var appErr *apperror.AppError
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
+			return apperror.ResponseErrorJSON(c, appErr, message.UserNotFound)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.GetUserFailed)
 	}
 
 	return c.JSON(http.StatusOK, user)
