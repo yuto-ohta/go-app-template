@@ -79,3 +79,19 @@ func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, erro
 
 	return user, nil
 }
+
+func (u UserRepositoryImpl) UpdateUser(id valueobject.UserId, user domain.User) (domain.User, error) {
+	var err error
+
+	// ID以外を新しい値にする
+	newUser := model.NewUserModel(user)
+	newUser.ID = id.GetValue()
+
+	// SQL実行
+	result := db.Conn.Save(&newUser)
+	if err = result.Error; err != nil {
+		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	return u.FindById(id)
+}

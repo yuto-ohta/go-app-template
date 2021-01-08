@@ -3,15 +3,14 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
-	"go-app-template/src/apputil"
 	"go-app-template/src/domain"
 	"go-app-template/src/usecase"
 	"net/http"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/labstack/echo/v4"
 )
@@ -86,8 +85,8 @@ func (u UserController) DeleteUser(c echo.Context) error {
 
 	// delete user
 	var user domain.User
-	var appErr *apperror.AppError
 	if user, err = u.userUseCase.DeleteUser(id); err != nil {
+		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
 			return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
 		}
@@ -95,6 +94,44 @@ func (u UserController) DeleteUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
+}
+
+/*
+	ユーザーを更新する
+	@path_param id: userId
+	@body_param id: userId, name: userName
+	@return user
+*/
+func (u UserController) UpdateUser(c echo.Context) error {
+	var err error
+
+	// get userId
+	var id int
+	if id, err = getUserIdParam(c.Param("id")); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.InvalidUserId)
+	}
+
+	// get userDto
+	var newUser dto.UserDto
+	if err = c.Bind(&newUser); err != nil {
+		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return apperror.ResponseErrorJSON(c, appErr, message.StatusBadRequest)
+	}
+	if err = newUser.Validate(); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	// update user
+	var updated dto.UserDto
+	if updated, err = u.userUseCase.UpdateUser(id, newUser); err != nil {
+		var appErr *apperror.AppError
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
+			return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.UpdateUserFailed)
+	}
+
+	return c.JSON(http.StatusOK, updated)
 }
 
 func getUserIdParam(param string) (int, error) {
@@ -119,22 +156,8 @@ func getUserNameParam(param string) (string, error) {
 	// 両端の半角・全角スペースを取り除く
 	param = strings.TrimSpace(param)
 
-	// 空文字はNG
-	if param == "" {
-		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"が空文字になっています, userName: %v`, param), http.StatusBadRequest)
-		return "", appErr
-	}
-
-	// 半角・全角スペース, 改行を含む場合はNG
-	if apputil.ContainsSpace(param) {
-		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"に半角・全角スペース, 改行コードが含まれています, userName: %v`, param), http.StatusBadRequest)
-		return "", appErr
-	}
-
-	// 9文字以上はNG
-	if utf8.RuneCountInString(param) > 8 {
-		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf(`userNameは最大8文字までです, userName: %v`, param), http.StatusBadRequest)
-		return "", appErr
+	if err := dto.ValidateName(param); err != nil {
+		return "", apperror.NewAppError(err)
 	}
 
 	return param, nil

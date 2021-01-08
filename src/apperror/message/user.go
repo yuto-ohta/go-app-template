@@ -8,6 +8,7 @@ const (
 	InvalidUserName
 	CreateUserFailed
 	DeleteUserFailed
+	UpdateUserFailed
 )
 
 func (u User) String() string {
@@ -17,6 +18,7 @@ func (u User) String() string {
 		InvalidUserName:  "ユーザー名の形式が間違っています",
 		CreateUserFailed: "ユーザー登録に失敗しました",
 		DeleteUserFailed: "ユーザー削除に失敗しました",
+		UpdateUserFailed: "ユーザー更新に失敗しました",
 	}
 	return messages[u]
 }

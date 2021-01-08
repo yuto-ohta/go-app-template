@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/json"
+	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/domain/valueobject"
 
@@ -44,6 +45,13 @@ func (u User) GetId() valueobject.UserId {
 
 func (u User) GetName() string {
 	return u.name
+}
+
+func (u User) ToDto() *dto.UserDto {
+	return &dto.UserDto{
+		Id:   u.id.GetValue(),
+		Name: u.name,
+	}
 }
 
 func (u User) MarshalJSON() ([]byte, error) {
