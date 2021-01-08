@@ -19,23 +19,22 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 }
 
 func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error) {
-	var (
-		userModel model.User
-		user      *domain.User
-		err       error
-	)
+	var err error
 
 	// SQL実行
-	if err = db.Conn.Raw("SELECT * FROM users WHERE id = ?", id.GetValue()).Scan(&userModel).Error; err != nil {
+	var userModel model.User
+	result := db.Conn.Raw("SELECT * FROM users WHERE id = ?", id.GetValue()).Scan(&userModel)
+	if err = result.Error; err != nil {
 		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
 	// NotFoundのエラーハンドリング
-	if userModel.ID == 0 {
+	if result.RowsAffected == -1 {
 		return domain.User{}, apperror.NewAppErrorWithStatus(gorm.ErrRecordNotFound, http.StatusNotFound)
 	}
 
 	// domainに変換
+	var user *domain.User
 	if user, err = userModel.ToDomain(); err != nil {
 		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
