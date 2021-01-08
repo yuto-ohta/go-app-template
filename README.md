@@ -50,7 +50,27 @@ curl -i -X POST \
 
 * GET `http://localhost:1323/user/:id`
     * ユーザー取得
-* POST `http://localhost:1323/user/:id/update`
+
+ ```
+curl -i -X GET \
+ 'http://localhost:1323/user/1'  
+ ``` 
+    
+* PUT `http://localhost:1323/user/:id/update`
     * ユーザー更新
+    
+```
+curl -i -X PUT \
+   -H "Content-Type:application/json" \
+   -d \
+'{"name":"オパビニア"}' \
+ 'http://localhost:1323/user/1/update'
+```
+
 * DELETE `http://localhost:1323/user/:id`
     * ユーザー削除
+
+```
+curl -i -X DELETE \
+ 'http://localhost:1323/user/1'
+```

@@ -148,7 +148,7 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makePostInputs("/user/new", makeBodyList(makeUserDtoJsonList(userNames))),
+			makeInputs(http.MethodPost, "/user/new", makeBodyList(makeUserDtoJsonList(userNames))),
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
@@ -199,9 +199,15 @@ func TestUserController_UpdateUser_正常系(t *testing.T) {
 	var params = []statusOKCheckParam{
 		{
 			"正常にユーザー名が更新できること",
-			input{httpMethod: http.MethodPost, path: "/user/1/update", body: strings.NewReader(`{"id":1,"name":"ハルキゲニア"}`)},
+			input{httpMethod: http.MethodPut, path: "/user/1/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)},
 			1,
 			"ハルキゲニア",
+		},
+		{
+			"ボディのuserIdにパスと異なる値が指定されているときにも、正常にパスで指定したユーザーが更新されること（ボディのuserIdが無視されること）",
+			input{httpMethod: http.MethodPut, path: "/user/2/update", body: strings.NewReader(`{"id":3,"name":"ビクトリア3世"}`)},
+			2,
+			"ビクトリア3世",
 		},
 	}
 
@@ -211,36 +217,36 @@ func TestUserController_UpdateUser_正常系(t *testing.T) {
 
 func TestUserController_UpdateUser_異常系(t *testing.T) {
 	// setup
-	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎　"}
+	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー\n太郎　"}
 
 	var params = []errorCheckParam{
 		{
 			"存在しないuserIdのとき、404になること",
-			[]input{{httpMethod: http.MethodPost, path: "/user/9999/update", body: strings.NewReader(`{"id":1,"name":"ハルキゲニア"}`)}},
+			[]input{{httpMethod: http.MethodPut, path: "/user/9999/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)}},
 			http.StatusNotFound,
 			message.UserNotFound,
 		},
 		{
 			"userNameが空文字のとき、400になること",
-			[]input{{httpMethod: http.MethodPost, path: "/user/1/update", body: strings.NewReader(`{"id":1,"name":""}`)}},
+			[]input{{httpMethod: http.MethodPut, path: "/user/1/update", body: strings.NewReader(`{"name":""}`)}},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
 			"userNameがnilのとき、400になること",
-			[]input{{httpMethod: http.MethodPost, path: "/user/1/update", body: strings.NewReader(`{"id":1,"name":}`)}},
+			[]input{{httpMethod: http.MethodPut, path: "/user/1/update", body: strings.NewReader(`{"name":}`)}},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makePostInputs("/user/1/update", makeBodyList(makeUserDtoJsonList(userNames))),
+			makeInputs(http.MethodPut, "/user/1/update", makeBodyList(makeUserDtoJsonList(userNames))),
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
 			"userNameが9文字以上のとき、400になること",
-			[]input{{httpMethod: http.MethodPost, path: "/user/1/update", body: strings.NewReader(`{"id":1,"name":"123456789"}`)}},
+			[]input{{httpMethod: http.MethodPut, path: "/user/1/update", body: strings.NewReader(`{"name":"123456789"}`)}},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
@@ -253,7 +259,7 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPattern RecordCheckPattern) {
 	for _, p := range params {
 		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-		if p.input.httpMethod == http.MethodPost {
+		if p.input.httpMethod == http.MethodPost || p.input.httpMethod == http.MethodPut {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		}
 		rec := httptest.NewRecorder()
@@ -295,7 +301,7 @@ func doErrorCheck(t *testing.T, params []errorCheckParam) {
 	for _, p := range params {
 		for _, ip := range p.input {
 			req := httptest.NewRequest(ip.httpMethod, ip.path, ip.body)
-			if ip.httpMethod == http.MethodPost {
+			if ip.httpMethod == http.MethodPost || ip.httpMethod == http.MethodPut {
 				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			}
 			rec := httptest.NewRecorder()
@@ -355,11 +361,11 @@ func makePathParamInputs(httpMethod string, pathBase string, pathParams []string
 	return inputs
 }
 
-func makePostInputs(path string, body []io.Reader) []input {
+func makeInputs(method string, path string, body []io.Reader) []input {
 	inputs := make([]input, len(body))
 	for i, p := range body {
 		input := &input{
-			httpMethod: http.MethodPost,
+			httpMethod: method,
 			path:       path,
 			body:       p,
 		}

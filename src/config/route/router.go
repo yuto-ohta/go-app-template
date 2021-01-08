@@ -26,7 +26,7 @@ func NewRouter() *echo.Echo {
 	e.GET("/user/:id", userController.GetUser)
 	e.POST("/user/new", userController.CreateUser)
 	e.DELETE("/user/:id", userController.DeleteUser)
-	e.POST("/user/:id/update", userController.UpdateUser)
+	e.PUT("/user/:id/update", userController.UpdateUser)
 
 	return e
 }
