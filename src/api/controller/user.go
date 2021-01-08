@@ -22,7 +22,7 @@ func NewUserController(useCase usecase.UserUseCase) *UserController {
 }
 
 /*
-	ユーザーをuserIdで取得する
+	ユーザーを取得する
 	@path_param id: userId
 	@return user
 */
@@ -101,7 +101,7 @@ func (u UserController) DeleteUser(c echo.Context) error {
 /*
 	ユーザーを更新する
 	@path_param id: userId
-	@body_param id: userId, name: userName
+	@body_param name: userName
 	@return user
 */
 func (u UserController) UpdateUser(c echo.Context) error {
