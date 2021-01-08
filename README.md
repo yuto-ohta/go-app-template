@@ -37,7 +37,7 @@
 ## ■Routing
 
 * [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
-* POST `http://localhost:1323/user/new`
+* POST `http://localhost:1323/users/new`
     * ユーザー登録
 
 ```
@@ -45,16 +45,16 @@ curl -i -X POST \
    -H "Content-Type:application/json" \
    -d \
 '{"name":"ハルキゲニア"}' \
- 'http://localhost:1323/user/new'
+ 'http://localhost:1323/users/new'
 ```
 
-* GET `http://localhost:1323/user/:id`
+* GET `http://localhost:1323/users/:id`
     * ユーザー取得
     
 * GET `http://localhost:1323/users`
     * ユーザー全取得
 
-* PUT `http://localhost:1323/user/:id/update`
+* PUT `http://localhost:1323/users/:id/update`
     * ユーザー更新
     
 ```
@@ -62,8 +62,8 @@ curl -i -X PUT \
    -H "Content-Type:application/json" \
    -d \
 '{"name":"オパビニア"}' \
- 'http://localhost:1323/user/1/update'
+ 'http://localhost:1323/users/1/update'
 ```
 
-* DELETE `http://localhost:1323/user/:id`
+* DELETE `http://localhost:1323/users/:id`
     * ユーザー削除

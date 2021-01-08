@@ -23,11 +23,11 @@ func NewRouter() *echo.Echo {
 	userController := controller.NewUserController(userUseCase)
 
 	// routing
-	e.GET("/user/:id", userController.GetUser)
+	e.GET("/users/:id", userController.GetUser)
 	e.GET("/users", userController.GetAll)
-	e.POST("/user/new", userController.CreateUser)
-	e.DELETE("/user/:id", userController.DeleteUser)
-	e.PUT("/user/:id/update", userController.UpdateUser)
+	e.POST("/users/new", userController.CreateUser)
+	e.DELETE("/users/:id", userController.DeleteUser)
+	e.PUT("/users/:id/update", userController.UpdateUser)
 
 	return e
 }
