@@ -50,6 +50,9 @@ curl -i -X POST \
 
 * GET `http://localhost:1323/user/:id`
     * ユーザー取得
+    
+* GET `http://localhost:1323/users`
+    * ユーザー全取得
 
 * PUT `http://localhost:1323/user/:id/update`
     * ユーザー更新

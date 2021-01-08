@@ -42,6 +42,29 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	return *user, nil
 }
 
+func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
+	var err error
+
+	// SQL実行
+	var userModelList []model.User
+	result := db.Conn.Raw("SELECT * FROM users").Scan(&userModelList)
+	if err = result.Error; err != nil {
+		return []domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	// domainに変換
+	userList := make([]domain.User, len(userModelList))
+	for i, u := range userModelList {
+		var user *domain.User
+		if user, err = u.ToDomain(); err != nil {
+			return []domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+		}
+		userList[i] = *user
+	}
+
+	return userList, nil
+}
+
 func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	var err error
 	userModel := model.User{Name: user.GetName()}

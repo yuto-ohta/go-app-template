@@ -35,6 +35,25 @@ func (u UserUseCaseImpl) FindById(id int) (dto.UserDto, error) {
 	return *found.ToDto(), nil
 }
 
+func (u UserUseCaseImpl) FindAll() ([]dto.UserDto, error) {
+	var err error
+
+	// find all user
+	var all []domain.User
+	if all, err = u.userRepository.FindAll(); err != nil {
+		return []dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	}
+
+	// convert to dto
+	var allDto = make([]dto.UserDto, len(all))
+	for i, u := range all {
+		user := u.ToDto()
+		allDto[i] = *user
+	}
+
+	return allDto, nil
+}
+
 func (u UserUseCaseImpl) CreateUser(userName string) (dto.UserDto, error) {
 	var err error
 

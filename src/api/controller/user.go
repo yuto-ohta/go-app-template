@@ -49,6 +49,22 @@ func (u UserController) GetUser(c echo.Context) error {
 }
 
 /*
+	ユーザーを全件取得する
+	@return users
+*/
+func (u UserController) GetAll(c echo.Context) error {
+	var err error
+
+	// get all user
+	var users []dto.UserDto
+	if users, err = u.userUseCase.FindAll(); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.GetUserFailed)
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+/*
 	ユーザーを新規登録する
 	@body_param name: userName
 	@return user
