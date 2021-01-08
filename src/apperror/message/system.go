@@ -10,7 +10,7 @@ const (
 func (s System) String() string {
 	var messages = map[System]string{
 		SystemError:      "システムエラー",
-		StatusBadRequest: "リクエストの形式が間違っています",
+		StatusBadRequest: "リクエストボディに誤りがあります",
 	}
 	return messages[s]
 }

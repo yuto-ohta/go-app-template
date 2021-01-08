@@ -120,13 +120,13 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 	var params = []statusOKCheckParam{
 		{
 			"正常にユーザーが登録されること",
-			input{httpMethod: http.MethodGet, path: "/user/new?name=新規ユーザー太郎", body: nil},
+			input{httpMethod: http.MethodPost, path: "/user/new", body: strings.NewReader(`{"name":"新規ユーザー太郎"}`)},
 			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
 		{
-			"userNameの両端に半角・全角スペースがあるとき、スペースが取り除かれ、ユーザーが登録されること",
-			input{httpMethod: http.MethodGet, path: fmt.Sprintf("/user/new?name=%v", apputil.QueryEncoding(" 　 　新規ユーザー太郎 　 　")), body: nil},
+			"userIdに既存の値が指定されているときにも、正常にユーザーが登録されること（userIdが無視されること）",
+			input{httpMethod: http.MethodPost, path: "/user/new", body: strings.NewReader(`{"id":1,"name":"新規ユーザー太郎"}`)},
 			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
@@ -137,26 +137,26 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 }
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
-	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー\n太郎　"}
+	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー\n太郎　"}
 
 	var params = []errorCheckParam{
 		{
 			"userNameが空文字のとき、400になること",
-			[]input{{httpMethod: http.MethodGet, path: "/user/new?name=", body: nil}},
+			[]input{{httpMethod: http.MethodPost, path: "/user/new", body: strings.NewReader(`{"name":""}`)}},
 			http.StatusBadRequest,
-			message.InvalidUserName,
+			message.StatusBadRequest,
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeQueryParamInputs(http.MethodGet, "/user/new?name=", userNames, nil),
+			makePostInputs("/user/new", makeBodyList(makeUserDtoJsonList(userNames))),
 			http.StatusBadRequest,
-			message.InvalidUserName,
+			message.StatusBadRequest,
 		},
 		{
 			"userNameが9文字以上のとき、400になること",
-			[]input{{httpMethod: http.MethodGet, path: "/user/new?name=123456789", body: nil}},
+			[]input{{httpMethod: http.MethodPost, path: "/user/new", body: strings.NewReader(`{"name":"123456789"}`)}},
 			http.StatusBadRequest,
-			message.InvalidUserName,
+			message.StatusBadRequest,
 		},
 	}
 
@@ -342,7 +342,7 @@ func doRecordNotExistingCheck(t *testing.T, recordId int) {
 	assert.Equal(t, expectedErrMessage, actualErrMessage)
 }
 
-func makeQueryParamInputs(httpMethod string, pathBase string, pathParams []string, body io.Reader) []input {
+func makePathParamInputs(httpMethod string, pathBase string, pathParams []string, body io.Reader) []input {
 	inputs := make([]input, len(pathParams))
 	for i, p := range pathParams {
 		input := &input{

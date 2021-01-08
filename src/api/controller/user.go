@@ -9,7 +9,6 @@ import (
 	"go-app-template/src/usecase"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -47,21 +46,25 @@ func (u UserController) GetUser(c echo.Context) error {
 
 /*
 	ユーザーを新規登録する
-	@query_param name: userName
+	@body_param name: userName
 	@return user
 */
 func (u UserController) CreateUser(c echo.Context) error {
 	var err error
 
-	// get userName
-	var userName string
-	if userName, err = getUserNameParam(c.QueryParam("name")); err != nil {
-		return apperror.ResponseErrorJSON(c, err, message.InvalidUserName)
+	// get userDto
+	var userDto dto.UserDto
+	if err = c.Bind(&userDto); err != nil {
+		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return apperror.ResponseErrorJSON(c, appErr, message.StatusBadRequest)
+	}
+	if err = userDto.Validate(); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
 	}
 
 	// register user
 	var user dto.UserDto
-	if user, err = u.userUseCase.CreateUser(userName); err != nil {
+	if user, err = u.userUseCase.CreateUser(userDto.Name); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
 
@@ -149,15 +152,4 @@ func getUserIdParam(param string) (int, error) {
 	}
 
 	return id, nil
-}
-
-func getUserNameParam(param string) (string, error) {
-	// 両端の半角・全角スペースを取り除く
-	param = strings.TrimSpace(param)
-
-	if err := dto.ValidateName(param); err != nil {
-		return "", apperror.NewAppError(err)
-	}
-
-	return param, nil
 }

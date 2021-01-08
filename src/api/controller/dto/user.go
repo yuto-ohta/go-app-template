@@ -29,7 +29,7 @@ func (u UserDto) Validate() error {
 }
 
 func ValidateId(id int) error {
-	rules := "gte=1"
+	rules := "omitempty,gte=1"
 	if err := validate.Var(id, rules); err != nil {
 		return apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
