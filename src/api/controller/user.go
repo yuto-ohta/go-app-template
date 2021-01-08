@@ -6,7 +6,6 @@ import (
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
-	"go-app-template/src/domain"
 	"go-app-template/src/usecase"
 	"net/http"
 	"strconv"
@@ -38,7 +37,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	}
 
 	// get user
-	var user domain.User
+	var user dto.UserDto
 	if user, err = u.userUseCase.FindById(id); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
 	}
@@ -61,7 +60,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	}
 
 	// register user
-	var user domain.User
+	var user dto.UserDto
 	if user, err = u.userUseCase.CreateUser(userName); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
@@ -84,7 +83,7 @@ func (u UserController) DeleteUser(c echo.Context) error {
 	}
 
 	// delete user
-	var user domain.User
+	var user dto.UserDto
 	if user, err = u.userUseCase.DeleteUser(id); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {

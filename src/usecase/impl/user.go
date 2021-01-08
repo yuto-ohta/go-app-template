@@ -17,43 +17,65 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
-func (u UserUseCaseImpl) FindById(id int) (domain.User, error) {
+func (u UserUseCaseImpl) FindById(id int) (dto.UserDto, error) {
+	var err error
+
 	//get userId
 	var userId *valueobject.UserId
-	var err error
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
-	return u.userRepository.FindById(*userId)
+	// find user
+	var found domain.User
+	if found, err = u.userRepository.FindById(*userId); err != nil {
+		return dto.UserDto{}, apperror.NewAppError(err)
+	}
+
+	return *found.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) CreateUser(userName string) (domain.User, error) {
-	// get user domain
-	var user *domain.User
+func (u UserUseCaseImpl) CreateUser(userName string) (dto.UserDto, error) {
 	var err error
-	if user, err = domain.NewUser(userName); err != nil {
-		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+
+	// get user domain
+	var newUser *domain.User
+	if newUser, err = domain.NewUser(userName); err != nil {
+		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
-	return u.userRepository.CreateUser(*user)
+	// create user
+	var created domain.User
+	if created, err = u.userRepository.CreateUser(*newUser); err != nil {
+		return dto.UserDto{}, apperror.NewAppError(err)
+	}
+
+	return *created.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) DeleteUser(id int) (domain.User, error) {
+func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserDto, error) {
+	var err error
+
 	// get userId
 	var userId *valueobject.UserId
-	var err error
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
-	return u.userRepository.DeleteUser(*userId)
+	// delete user
+	var deleted domain.User
+	if deleted, err = u.userRepository.DeleteUser(*userId); err != nil {
+		return dto.UserDto{}, apperror.NewAppError(err)
+	}
+
+	return *deleted.ToDto(), nil
 }
 
 func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserDto) (dto.UserDto, error) {
+	var err error
+
 	// get userId
 	var userId *valueobject.UserId
-	var err error
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
 		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
