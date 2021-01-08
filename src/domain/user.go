@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"encoding/json"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/domain/valueobject"
@@ -16,11 +15,6 @@ var (
 type User struct {
 	id   valueobject.UserId
 	name string
-}
-
-type userJSON struct {
-	Id   int
-	Name string
 }
 
 func NewUser(name string) (*User, error) {
@@ -52,32 +46,6 @@ func (u User) ToDto() *dto.UserDto {
 		Id:   u.id.GetValue(),
 		Name: u.name,
 	}
-}
-
-func (u User) MarshalJSON() ([]byte, error) {
-	value, err := json.Marshal(&userJSON{
-		Id:   u.id.GetValue(),
-		Name: u.name,
-	})
-	return value, err
-}
-
-func (u *User) UnmarshalJSON(b []byte) error {
-	var err error
-
-	var userJSON userJSON
-	if err = json.Unmarshal(b, &userJSON); err != nil {
-		return err
-	}
-
-	var id *valueobject.UserId
-	if id, err = valueobject.NewUserIdWithId(userJSON.Id); err != nil {
-		return err
-	}
-
-	u.id = *id
-	u.name = userJSON.Name
-	return nil
 }
 
 func (u User) Validate() error {
