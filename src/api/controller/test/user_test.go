@@ -113,6 +113,43 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+func TestUserController_GetAll_正常系(t *testing.T) {
+	// setup
+	p := statusOKCheckParam{
+		"正常にユーザーが全件取得できること",
+		input{httpMethod: http.MethodGet, path: "/users", body: nil},
+		1,
+		"まるお",
+	}
+	req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
+	rec := httptest.NewRecorder()
+	_target.ServeHTTP(rec, req)
+
+	// actual
+	actualCode := rec.Code
+	var actualBody []dto.UserDto
+	_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
+	actualLen := len(actualBody)
+	actualBodyLimitOne := actualBody[0]
+
+	// expected
+	expectedCode := http.StatusOK
+	expectedLen := 10
+	expectedBodyLimitOne := &dto.UserDto{
+		Id:   p.expectedUserIdInt,
+		Name: p.expectedName,
+	}
+
+	// check
+	fmt.Println(p.title)
+	assert.Equal(t, expectedCode, actualCode)
+	assert.Equal(t, expectedLen, actualLen)
+	assert.Equal(t, *expectedBodyLimitOne, actualBodyLimitOne)
+
+	// clean
+	localdata.InitializeLocalData()
+}
+
 func TestUserController_CreateUser_正常系(t *testing.T) {
 	// setup
 	const initializedLocalDataRecordCounts = 10
