@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"fmt"
 	"go-app-template/src/apperror"
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
@@ -52,12 +51,6 @@ func (u UserRepositoryImpl) FindAll(limit int, offset int) ([]domain.User, error
 	if err = result.Error; err != nil {
 		return []domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
-
-	stmt := db.Conn.Session(&gorm.Session{DryRun: true}).Limit(limit).Offset(offset).Find(&userModelList).Statement
-	fmt.Println(stmt.SQL.String())
-	fmt.Println("-----------------------------------")
-	fmt.Println(result)
-	fmt.Println(userModelList)
 
 	// domainに変換
 	userList := make([]domain.User, len(userModelList))
