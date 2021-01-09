@@ -22,7 +22,7 @@ func NewUserController(useCase usecase.UserUseCase) *UserController {
 }
 
 /*
-	ユーザーを取得する
+	ユーザーをuserIdで取得する
 	@path_param id: userId
 	@return user
 */
@@ -37,7 +37,7 @@ func (u UserController) GetUser(c echo.Context) error {
 
 	// get user
 	var user dto.UserDto
-	if user, err = u.userUseCase.FindById(id); err != nil {
+	if user, err = u.userUseCase.GetUser(id); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
 			return apperror.ResponseErrorJSON(c, appErr, message.UserNotFound)
@@ -49,15 +49,32 @@ func (u UserController) GetUser(c echo.Context) error {
 }
 
 /*
-	ユーザーを全件取得する
+	ユーザーを全件取得する(オプション: limit & offset)
+	@query_param limit
+	@query_param offset
 	@return users
 */
-func (u UserController) GetAll(c echo.Context) error {
+func (u UserController) GetAllUser(c echo.Context) error {
 	var err error
+
+	// get limit & offset
+	var limit int
+	if limit, err = getOptionalQueryParamInt(c.QueryParam("limit")); err != nil {
+		fmt.Println("err", err)
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	offset := -1
+	// limitが指定されているときに限り、offsetを取得する
+	if limit > 0 {
+		if offset, err = getOptionalQueryParamInt(c.QueryParam("offset")); err != nil {
+			return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+		}
+	}
 
 	// get all user
 	var users []dto.UserDto
-	if users, err = u.userUseCase.FindAll(); err != nil {
+	if users, err = u.userUseCase.GetAllUser(limit, offset); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.GetUserFailed)
 	}
 
@@ -172,4 +189,26 @@ func getUserIdParam(param string) (int, error) {
 	}
 
 	return id, nil
+}
+
+func getOptionalQueryParamInt(param string) (int, error) {
+	var err error
+
+	// 未指定はOK
+	if len(param) == 0 {
+		return -1, nil
+	}
+
+	// 数字以外はNG
+	var paramInt int
+	if paramInt, err = strconv.Atoi(param); err != nil {
+		return -1, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	}
+
+	// 0以下はNG
+	if paramInt <= 0 {
+		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("このクエリパラメータは1以上を指定してください"), http.StatusBadRequest)
+	}
+
+	return paramInt, nil
 }

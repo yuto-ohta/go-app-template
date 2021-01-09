@@ -51,8 +51,9 @@ curl -i -X POST \
 * GET `http://localhost:1323/users/:id`
     * ユーザー取得
     
-* GET `http://localhost:1323/users`
+* GET `http://localhost:1323/users?limit=1&offset=1`
     * ユーザー全取得
+    * オプション: limit, offset
 
 * PUT `http://localhost:1323/users/:id/update`
     * ユーザー更新

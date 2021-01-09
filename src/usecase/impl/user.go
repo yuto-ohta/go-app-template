@@ -17,7 +17,7 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
-func (u UserUseCaseImpl) FindById(id int) (dto.UserDto, error) {
+func (u UserUseCaseImpl) GetUser(id int) (dto.UserDto, error) {
 	var err error
 
 	//get userId
@@ -35,12 +35,12 @@ func (u UserUseCaseImpl) FindById(id int) (dto.UserDto, error) {
 	return *found.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) FindAll() ([]dto.UserDto, error) {
+func (u UserUseCaseImpl) GetAllUser(limit int, offset int) ([]dto.UserDto, error) {
 	var err error
 
 	// find all user
 	var all []domain.User
-	if all, err = u.userRepository.FindAll(); err != nil {
+	if all, err = u.userRepository.FindAll(limit, offset); err != nil {
 		return []dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
