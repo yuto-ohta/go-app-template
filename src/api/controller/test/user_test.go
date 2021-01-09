@@ -102,8 +102,11 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 			message.InvalidUserId,
 		},
 		{
-			"userIdがマイナスのとき、400になること",
-			[]input{{httpMethod: http.MethodGet, path: "/users/-1", body: nil}},
+			"userIdが0以下のとき、400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users/0", body: nil},
+				{httpMethod: http.MethodGet, path: "/users/-1", body: nil},
+			},
 			http.StatusBadRequest,
 			message.InvalidUserId,
 		},
@@ -113,41 +116,97 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
-func TestUserController_GetAll_正常系(t *testing.T) {
+func TestUserController_GetAllUser_正常系(t *testing.T) {
 	// setup
-	p := statusOKCheckParam{
-		"正常にユーザーが全件取得できること",
-		input{httpMethod: http.MethodGet, path: "/users", body: nil},
-		1,
-		"まるお",
+	params := []struct {
+		base        statusOKCheckParam
+		expectedLen int
+	}{
+		{statusOKCheckParam{
+			"正常にユーザーが全件取得できること",
+			input{httpMethod: http.MethodGet, path: "/users", body: nil},
+			1,
+			"まるお"},
+			10,
+		},
+		{statusOKCheckParam{
+			"limitを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?limit=5", body: nil},
+			1,
+			"まるお"},
+			5,
+		},
+		{statusOKCheckParam{
+			"offsetのみが指定されている場合、正常にユーザーが全件取得されること（offsetが無視されること）",
+			input{httpMethod: http.MethodGet, path: "/users?offset=5", body: nil},
+			1,
+			"まるお"},
+			10,
+		},
+		{statusOKCheckParam{
+			"limitとoffsetを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?limit=3&offset=3", body: nil},
+			4,
+			"腕時計両腕ちゃん"},
+			3,
+		},
 	}
-	req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
-	rec := httptest.NewRecorder()
-	_target.ServeHTTP(rec, req)
 
-	// actual
-	actualCode := rec.Code
-	var actualBody []dto.UserDto
-	_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
-	actualLen := len(actualBody)
-	actualBodyLimitOne := actualBody[0]
+	for _, p := range params {
+		req := httptest.NewRequest(p.base.input.httpMethod, p.base.input.path, p.base.input.body)
+		rec := httptest.NewRecorder()
+		_target.ServeHTTP(rec, req)
 
-	// expected
-	expectedCode := http.StatusOK
-	expectedLen := 10
-	expectedBodyLimitOne := &dto.UserDto{
-		Id:   p.expectedUserIdInt,
-		Name: p.expectedName,
+		// actual
+		actualCode := rec.Code
+		var actualBody []dto.UserDto
+		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
+		actualLen := len(actualBody)
+		actualBodyLimitOne := actualBody[0]
+
+		// expected
+		expectedCode := http.StatusOK
+		expectedLen := p.expectedLen
+		expectedBodyLimitOne := &dto.UserDto{
+			Id:   p.base.expectedUserIdInt,
+			Name: p.base.expectedName,
+		}
+
+		// check
+		fmt.Println(p.base.title)
+		assert.Equal(t, expectedCode, actualCode)
+		assert.Equal(t, expectedLen, actualLen)
+		assert.Equal(t, *expectedBodyLimitOne, actualBodyLimitOne)
+	}
+}
+
+func TestUserController_GetAllUser_異常系(t *testing.T) {
+	// setup
+	var params = []errorCheckParam{
+		{
+			"limit or offsetが数字ではないとき、400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users?limit=hoge", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=hoge", body: nil},
+			},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"limit or offsetが0以下のとき、400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users?limit=0", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?limit=-1", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=0", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=-1", body: nil},
+			},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
 	}
 
 	// check
-	fmt.Println(p.title)
-	assert.Equal(t, expectedCode, actualCode)
-	assert.Equal(t, expectedLen, actualLen)
-	assert.Equal(t, *expectedBodyLimitOne, actualBodyLimitOne)
-
-	// clean
-	localdata.InitializeLocalData()
+	doErrorCheck(t, params)
 }
 
 func TestUserController_CreateUser_正常系(t *testing.T) {
@@ -323,7 +382,7 @@ func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPatte
 		switch recordCheckPattern {
 		case DoNothing:
 		case ExistingCheck:
-			actualRecord, _ := _userUseCase.FindById(p.expectedUserIdInt)
+			actualRecord, _ := _userUseCase.GetUser(p.expectedUserIdInt)
 			assert.Equal(t, *expectedBody, actualRecord)
 		case NotExistingCheck:
 			doRecordNotExistingCheck(t, p.expectedUserIdInt)
@@ -367,7 +426,7 @@ func doErrorCheck(t *testing.T, params []errorCheckParam) {
 
 func doRecordNotExistingCheck(t *testing.T, recordId int) {
 	// actual
-	_, actualErr := _userUseCase.FindById(recordId)
+	_, actualErr := _userUseCase.GetUser(recordId)
 	var actualErrCode int
 	var actualErrMessage string
 	var appErr *apperror.AppError
