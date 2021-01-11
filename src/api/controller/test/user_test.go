@@ -119,36 +119,178 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 func TestUserController_GetAllUser_正常系(t *testing.T) {
 	// setup
 	params := []struct {
-		base        statusOKCheckParam
-		expectedLen int
+		base             statusOKCheckParam
+		expectedPageInfo dto.PageInfo
+		expectedLen      int
 	}{
 		{statusOKCheckParam{
 			"正常にユーザーが全件取得できること",
 			input{httpMethod: http.MethodGet, path: "/users", body: nil},
 			1,
 			"まるお"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
 			10,
 		},
 		{statusOKCheckParam{
-			"limitを指定して、正常にユーザーが取得できること",
+			"limitのみを指定して、limit件数分、正常にユーザーが取得できること",
 			input{httpMethod: http.MethodGet, path: "/users?limit=5", body: nil},
 			1,
 			"まるお"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 2,
+				Limit:       5,
+				Offset:      0,
+			},
 			5,
 		},
 		{statusOKCheckParam{
-			"offsetのみが指定されている場合、正常にユーザーが全件取得されること（offsetが無視されること）",
-			input{httpMethod: http.MethodGet, path: "/users?offset=5", body: nil},
+			"page, limitを指定して、正常にユーザーが取得できること①",
+			input{httpMethod: http.MethodGet, path: "/users?page=1&limit=3", body: nil},
 			1,
 			"まるお"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 4,
+				Limit:       3,
+				Offset:      0,
+			},
+			3,
+		},
+		{statusOKCheckParam{
+			"page, limitを指定して、正常にユーザーが取得できること②",
+			input{httpMethod: http.MethodGet, path: "/users?page=3&limit=3", body: nil},
+			7,
+			"べらぼう太郎"},
+			dto.PageInfo{
+				PageNum:     3,
+				LastPageNum: 4,
+				Limit:       3,
+				Offset:      6,
+			},
+			3,
+		},
+		{statusOKCheckParam{
+			"page, limitを指定して、正常にユーザーが取得できること③",
+			input{httpMethod: http.MethodGet, path: "/users?page=4&limit=3", body: nil},
+			10,
+			"先生"},
+			dto.PageInfo{
+				PageNum:     4,
+				LastPageNum: 4,
+				Limit:       3,
+				Offset:      9,
+			},
+			1,
+		},
+		{statusOKCheckParam{
+			"最終ページを超過したpageを指定して、最終ページが正常に取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?page=10&limit=9", body: nil},
+			10,
+			"先生"},
+			dto.PageInfo{
+				PageNum:     2,
+				LastPageNum: 2,
+				Limit:       9,
+				Offset:      9,
+			},
+			1,
+		},
+		{statusOKCheckParam{
+			"orderBy=idのみを指定して、id・ASCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=id", body: nil},
+			1,
+			"まるお"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
 			10,
 		},
 		{statusOKCheckParam{
-			"limitとoffsetを指定して、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?limit=3&offset=3", body: nil},
+			"orderBy=nameのみを指定して、userName・ASCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name", body: nil},
+			7,
+			"べらぼう太郎"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
+			10,
+		},
+		{statusOKCheckParam{
+			"order=ascのみを指定して、id・ASCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?order=asc", body: nil},
+			1,
+			"まるお"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
+			10,
+		},
+		{statusOKCheckParam{
+			"order=descのみを指定して、id・DESCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?order=desc", body: nil},
+			10,
+			"先生"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
+			10,
+		},
+		{statusOKCheckParam{
+			"orderBy=name, order=ascを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=asc", body: nil},
+			7,
+			"べらぼう太郎"},
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
+			10,
+		},
+		{statusOKCheckParam{
+			"orderBy=name, order=descを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=desc", body: nil},
 			4,
 			"腕時計両腕ちゃん"},
-			3,
+			dto.PageInfo{
+				PageNum:     1,
+				LastPageNum: 1,
+				Limit:       10,
+				Offset:      0,
+			},
+			10,
+		},
+		{statusOKCheckParam{
+			"orderBy,order,page,limitを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=desc&page=3&limit=2", body: nil},
+			2,
+			"トマト君"},
+			dto.PageInfo{
+				PageNum:     3,
+				LastPageNum: 5,
+				Limit:       2,
+				Offset:      4,
+			},
+			2,
 		},
 	}
 
@@ -159,15 +301,17 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 
 		// actual
 		actualCode := rec.Code
-		var actualBody []dto.UserDto
+		var actualBody dto.UserPage
 		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
-		actualLen := len(actualBody)
-		actualBodyLimitOne := actualBody[0]
+		actualPageInfo := actualBody.PageInfo
+		actualLen := len(actualBody.Users)
+		actualBodyFirst := actualBody.Users[0]
 
 		// expected
 		expectedCode := http.StatusOK
+		expectedPageInfo := p.expectedPageInfo
 		expectedLen := p.expectedLen
-		expectedBodyLimitOne := &dto.UserDto{
+		expectedBodyFirst := dto.UserDto{
 			Id:   p.base.expectedUserIdInt,
 			Name: p.base.expectedName,
 		}
@@ -175,8 +319,9 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 		// check
 		fmt.Println(p.base.title)
 		assert.Equal(t, expectedCode, actualCode)
+		assert.Equal(t, expectedPageInfo, actualPageInfo)
 		assert.Equal(t, expectedLen, actualLen)
-		assert.Equal(t, *expectedBodyLimitOne, actualBodyLimitOne)
+		assert.Equal(t, expectedBodyFirst, actualBodyFirst)
 	}
 }
 
@@ -184,21 +329,45 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 	// setup
 	var params = []errorCheckParam{
 		{
-			"limit or offsetが数字ではないとき、400になること",
+			"pageのみ指定され、limitがないとき、400になること",
 			[]input{
-				{httpMethod: http.MethodGet, path: "/users?limit=hoge", body: nil},
-				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=hoge", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?page=5", body: nil},
 			},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
-			"limit or offsetが0以下のとき、400になること",
+			"page, limitが数字ではないとき、400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users?limit=hoge", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?page=hoge&limit=5", body: nil},
+			},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"page, limitが0以下のとき、400になること",
 			[]input{
 				{httpMethod: http.MethodGet, path: "/users?limit=0", body: nil},
 				{httpMethod: http.MethodGet, path: "/users?limit=-1", body: nil},
-				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=0", body: nil},
-				{httpMethod: http.MethodGet, path: "/users?limit=5&offset=-1", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?page=0&limit=2", body: nil},
+				{httpMethod: http.MethodGet, path: "/users?page=-1&limit=2", body: nil},
+			},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"orderByに存在しないColumnが指定されているとき, 400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users?orderBy=hoge", body: nil},
+			},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"orderにasc・desc以外が指定されているとき, 400になること",
+			[]input{
+				{httpMethod: http.MethodGet, path: "/users?order=hoge", body: nil},
 			},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
