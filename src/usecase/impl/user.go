@@ -1,11 +1,13 @@
 package impl
 
 import (
+	"fmt"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/repository"
 	"go-app-template/src/domain/valueobject"
+	"go-app-template/src/usecase/appmodel"
 	"net/http"
 )
 
@@ -35,23 +37,45 @@ func (u UserUseCaseImpl) GetUser(id int) (dto.UserDto, error) {
 	return *found.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) GetAllUser(limit int, offset int) ([]dto.UserDto, error) {
+func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.UserPage, error) {
 	var err error
 
 	// find all user
-	var all []domain.User
-	if all, err = u.userRepository.FindAll(limit, offset); err != nil {
-		return []dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
+	var allUser []domain.User
+	if allUser, err = u.userRepository.FindAll(); err != nil {
+		return dto.UserPage{}, apperror.NewAppError(err)
 	}
 
-	// convert to dto
-	var allDto = make([]dto.UserDto, len(all))
-	for i, u := range all {
-		user := u.ToDto()
-		allDto[i] = *user
+	// sort
+	if err = domain.Sort(condition.GetOrderBy(), condition.GetOrder(), allUser); err != nil {
+		return dto.UserPage{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
-	return allDto, nil
+	// make userPage
+	var userPage appmodel.Page
+	if userPage, err = makeUserPage(condition.GetPage(), condition.GetLimit(), allUser); err != nil {
+		return dto.UserPage{}, apperror.NewAppError(err)
+	}
+
+	// make userDtoList
+	var dtoList []dto.UserDto
+	if dtoList, err = makeUserDtoListFromPage(userPage); err != nil {
+		return dto.UserPage{}, apperror.NewAppError(err)
+	}
+
+	// make userPageDto
+	pageInfoDto := dto.PageInfo{
+		PageNum:     userPage.GetInfo().GetPageNum(),
+		LastPageNum: userPage.GetInfo().GetLastPageNum(),
+		Limit:       userPage.GetInfo().GetLimit(),
+		Offset:      userPage.GetInfo().GetOffset(),
+	}
+	userPageDto := dto.UserPage{
+		Users:    dtoList,
+		PageInfo: pageInfoDto,
+	}
+
+	return userPageDto, nil
 }
 
 func (u UserUseCaseImpl) CreateUser(userName string) (dto.UserDto, error) {
@@ -117,4 +141,36 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserDto) (dto.UserDto, erro
 	}
 
 	return *updated.ToDto(), nil
+}
+
+func makeUserPage(page int, limit int, target []domain.User) (appmodel.Page, error) {
+	var err error
+
+	// convert to Pageable
+	pageable := make(appmodel.Pageable, len(target))
+	for i, u := range target {
+		pageable[i] = u
+	}
+
+	// paging
+	var userPage *appmodel.Page
+	if userPage, err = pageable.GetPage(page, limit); err != nil {
+		return appmodel.Page{}, apperror.NewAppError(err)
+	}
+
+	return *userPage, nil
+}
+
+func makeUserDtoListFromPage(userPage appmodel.Page) ([]dto.UserDto, error) {
+	dtoList := make([]dto.UserDto, len(userPage.GetList()))
+	for i, e := range userPage.GetList() {
+		userDomain, ok := e.(domain.User)
+		if !ok {
+			return []dto.UserDto{}, apperror.NewAppErrorWithStatus(fmt.Errorf("型アサーションエラー\nfrom: %v\nto: domain.User", e), http.StatusInternalServerError)
+		}
+		userDto := userDomain.ToDto()
+		dtoList[i] = *userDto
+	}
+
+	return dtoList, nil
 }

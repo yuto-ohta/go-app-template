@@ -42,12 +42,12 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	return *user, nil
 }
 
-func (u UserRepositoryImpl) FindAll(limit int, offset int) ([]domain.User, error) {
+func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
 	var err error
 
 	// SQL実行
 	var userModelList []model.User
-	result := db.Conn.Limit(limit).Offset(offset).Find(&userModelList)
+	result := db.Conn.Find(&userModelList)
 	if err = result.Error; err != nil {
 		return []domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}

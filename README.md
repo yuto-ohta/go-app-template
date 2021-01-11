@@ -6,18 +6,23 @@
 │   └── db
 └── src
     ├── api
+    ├── apperror
+    ├── apputil
     ├── config
     ├── domain
-    ├── errors
     ├── infrastructure
-    ├── usecase
-    └── utils
+    └── usecase
 ```
 ## ■What is
 
-* golangでapiをつくりたい
-    * 将来的には、このリポジトリをテンプレートにして、いろいろなアプリをつくりたい
-* WIPです
+(WIP)
+* golangで基本的なAPIをつくる
+* 機能
+    * ユーザーテーブルのCRUD
+    * Rの全件取得はソート、ページングもする
+* その他
+    * アーキテクチャはDDD(風)
+    * 基本的なエラー機構, テストコード
 
 ## ■Setup
 
@@ -51,9 +56,9 @@ curl -i -X POST \
 * GET `http://localhost:1323/users/:id`
     * ユーザー取得
     
-* GET `http://localhost:1323/users?limit=1&offset=1`
+* GET `http://localhost:1323/users?orderBy=name&order=asc&limit=1&offset=1`
     * ユーザー全取得
-    * オプション: limit, offset
+    * オプション: orderBy, order, limit, offset
 
 * PUT `http://localhost:1323/users/:id/update`
     * ユーザー更新

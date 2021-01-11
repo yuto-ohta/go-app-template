@@ -7,6 +7,7 @@ import (
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/usecase"
+	"go-app-template/src/usecase/appmodel"
 	"net/http"
 	"strconv"
 
@@ -49,36 +50,53 @@ func (u UserController) GetUser(c echo.Context) error {
 }
 
 /*
-	ユーザーを全件取得する(オプション: limit & offset)
+	ユーザーを全件取得する(オプション: orderBy, order, page, limit)
+	@query_param orderBy
+	@query_param order
+	@query_param page
 	@query_param limit
-	@query_param offset
 	@return users
 */
 func (u UserController) GetAllUser(c echo.Context) error {
 	var err error
 
-	// get limit & offset
-	var limit int
-	if limit, err = getOptionalQueryParamInt(c.QueryParam("limit")); err != nil {
-		fmt.Println("err", err)
+	// get orderBy
+	var orderBy dto.UserSortColumn
+	if orderBy, err = getOptionalOrderByParam(c.QueryParam("orderBy")); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
 	}
 
-	offset := -1
-	// limitが指定されているときに限り、offsetを取得する
-	if limit > 0 {
-		if offset, err = getOptionalQueryParamInt(c.QueryParam("offset")); err != nil {
-			return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
-		}
+	// get order
+	var order appmodel.Order
+	if order, err = getOptionalOrderParam(c.QueryParam("order")); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
 	}
 
-	// get all user
-	var users []dto.UserDto
-	if users, err = u.userUseCase.GetAllUser(limit, offset); err != nil {
+	// get page
+	var page int
+	if page, err = getOptionalQueryParamInt(c.QueryParam("page")); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	// get limit
+	var limit int
+	if limit, err = getOptionalQueryParamInt(c.QueryParam("limit")); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	// make searchCondition
+	var condition *appmodel.SearchCondition
+	if condition, err = appmodel.NewSearchCondition(orderBy.String(), order, page, limit); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	// get users
+	var userPage dto.UserPage
+	if userPage, err = u.userUseCase.GetAllUser(*condition); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.GetUserFailed)
 	}
 
-	return c.JSON(http.StatusOK, users)
+	return c.JSON(http.StatusOK, userPage)
 }
 
 /*
@@ -207,8 +225,38 @@ func getOptionalQueryParamInt(param string) (int, error) {
 
 	// 0以下はNG
 	if paramInt <= 0 {
-		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("このクエリパラメータは1以上を指定してください"), http.StatusBadRequest)
+		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("対象のクエリパラメータは1以上を指定してください"), http.StatusBadRequest)
 	}
 
 	return paramInt, nil
+}
+
+func getOptionalOrderByParam(param string) (dto.UserSortColumn, error) {
+	// 未指定の場合は、ソートColumnはIDとする
+	if len(param) == 0 {
+		return dto.ID, nil
+	}
+
+	switch param {
+	case dto.ID.String():
+		return dto.ID, nil
+	case dto.USERNAME.String():
+		return dto.USERNAME, nil
+	default:
+		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("指定のColumnはソートに使用できるものではありません, param: %v", param), http.StatusBadRequest)
+	}
+}
+
+func getOptionalOrderParam(param string) (appmodel.Order, error) {
+	// 未指定の場合は、orderはASCとする
+	if len(param) == 0 {
+		return appmodel.ASC, nil
+	}
+
+	order := appmodel.GetOrder(param)
+	if order < 0 {
+		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("orderには\"asc\",\"DESC\"のどちらかを使用してください, param: %v", param), http.StatusBadRequest)
+	}
+
+	return order, nil
 }
