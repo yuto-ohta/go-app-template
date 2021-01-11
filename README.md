@@ -15,7 +15,6 @@
 ```
 ## ■What is
 
-(WIP)
 * golangで基本的なAPIをつくる
 * 機能
     * ユーザーテーブルのCRUD
