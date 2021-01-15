@@ -228,8 +228,8 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 			10,
 		},
 		{statusOKCheckParam{
-			"order=ascのみを指定して、id・ASCで、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?order=asc", body: nil},
+			"order=ASCのみを指定して、id・ASCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?order=ASC", body: nil},
 			1,
 			"まるお"},
 			dto.PageInfo{
@@ -241,8 +241,8 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 			10,
 		},
 		{statusOKCheckParam{
-			"order=descのみを指定して、id・DESCで、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?order=desc", body: nil},
+			"order=DESCのみを指定して、id・DESCで、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?order=DESC", body: nil},
 			10,
 			"先生"},
 			dto.PageInfo{
@@ -254,8 +254,8 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 			10,
 		},
 		{statusOKCheckParam{
-			"orderBy=name, order=ascを指定して、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=asc", body: nil},
+			"orderBy=name, order=ASCを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=ASC", body: nil},
 			7,
 			"べらぼう太郎"},
 			dto.PageInfo{
@@ -267,8 +267,8 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 			10,
 		},
 		{statusOKCheckParam{
-			"orderBy=name, order=descを指定して、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=desc", body: nil},
+			"orderBy=name, order=DESCを指定して、正常にユーザーが取得できること",
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=DESC", body: nil},
 			4,
 			"腕時計両腕ちゃん"},
 			dto.PageInfo{
@@ -281,7 +281,7 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 		},
 		{statusOKCheckParam{
 			"orderBy,order,page,limitを指定して、正常にユーザーが取得できること",
-			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=desc&page=3&limit=2", body: nil},
+			input{httpMethod: http.MethodGet, path: "/users?orderBy=name&order=DESC&page=3&limit=2", body: nil},
 			2,
 			"トマト君"},
 			dto.PageInfo{
@@ -365,7 +365,7 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 			message.StatusBadRequest,
 		},
 		{
-			"orderにasc・desc以外が指定されているとき, 400になること",
+			"orderにASC・desc以外が指定されているとき, 400になること",
 			[]input{
 				{httpMethod: http.MethodGet, path: "/users?order=hoge", body: nil},
 			},

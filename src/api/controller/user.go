@@ -255,7 +255,7 @@ func getOptionalOrderParam(param string) (appmodel.Order, error) {
 
 	order := appmodel.GetOrder(param)
 	if order < 0 {
-		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("orderには\"asc\",\"DESC\"のどちらかを使用してください, param: %v", param), http.StatusBadRequest)
+		return -1, apperror.NewAppErrorWithStatus(fmt.Errorf("orderには\"ASC\",\"DESC\"のどちらかを使用してください, param: %v", param), http.StatusBadRequest)
 	}
 
 	return order, nil

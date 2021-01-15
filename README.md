@@ -55,7 +55,7 @@ curl -i -X POST \
 * GET `http://localhost:1323/users/:id`
     * ユーザー取得
     
-* GET `http://localhost:1323/users?orderBy=name&order=asc&limit=1&offset=1`
+* GET `http://localhost:1323/users?orderBy=name&order=ASC&limit=1&offset=1`
     * ユーザー全取得
     * オプション: orderBy, order, limit, offset
 

@@ -9,8 +9,8 @@ const (
 
 func (o Order) String() string {
 	var messages = map[Order]string{
-		ASC:  "asc",
-		DESC: "desc",
+		ASC:  "ASC",
+		DESC: "DESC",
 	}
 	return messages[o]
 }
