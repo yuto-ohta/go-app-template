@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
+	"go-app-template/src/apputil"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase/appmodel"
-	"golang.org/x/crypto/bcrypt"
 	"sort"
 
 	"github.com/go-playground/validator/v10"
@@ -81,21 +81,12 @@ func (b *UserBuilder) Build() (*User, error) {
 }
 
 func encryptUserPassword(user *User) error {
-	hashedStr, err := generatePasswordHash(user.password)
+	hashedStr, err := apputil.GenerateHash(user.password)
 	if err != nil {
 		return apperror.NewAppError(err)
 	}
 	user.password = hashedStr
 	return nil
-}
-
-func generatePasswordHash(password string) (string, error) {
-	const cost = 10
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), cost)
-	if err != nil {
-		return "", apperror.NewAppError(err)
-	}
-	return string(hashed), nil
 }
 
 /**************************************

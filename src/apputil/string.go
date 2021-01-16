@@ -1,6 +1,7 @@
 package apputil
 
 import (
+	"golang.org/x/crypto/bcrypt"
 	"net/url"
 	"regexp"
 	"strings"
@@ -43,4 +44,13 @@ func HideWords(str string) string {
 		res = res + "●"
 	}
 	return res
+}
+
+func GenerateHash(str string) (string, error) {
+	const cost = 10
+	hashed, err := bcrypt.GenerateFromPassword([]byte(str), cost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashed), nil
 }
