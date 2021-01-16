@@ -51,10 +51,7 @@ func (u UserController) GetUser(c echo.Context) error {
 
 /**************************************
 	ユーザーを全件取得する(オプション: orderBy, order, page, limit)
-	@query_param orderBy
-	@query_param order
-	@query_param page
-	@query_param limit
+	@query_param orderBy, order, page, limit
 	@return users
 **************************************/
 func (u UserController) GetAllUser(c echo.Context) error {
