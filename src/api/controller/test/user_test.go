@@ -311,7 +311,7 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 		expectedCode := http.StatusOK
 		expectedPageInfo := p.expectedPageInfo
 		expectedLen := p.expectedLen
-		expectedBodyFirst := dto.UserDto{
+		expectedBodyFirst := dto.UserReceiveDto{
 			Id:   p.base.expectedUserIdInt,
 			Name: p.base.expectedName,
 		}
@@ -532,12 +532,12 @@ func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPatte
 
 		// actual
 		actualCode := rec.Code
-		var actualBody dto.UserDto
+		var actualBody dto.UserReceiveDto
 		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
 
 		// expected
 		expectedCode := http.StatusOK
-		expectedBody := &dto.UserDto{
+		expectedBody := &dto.UserReceiveDto{
 			Id:   p.expectedUserIdInt,
 			Name: p.expectedName,
 		}
@@ -650,7 +650,7 @@ func makeBodyList(jsonList [][]byte) []io.Reader {
 func makeUserDtoJsonList(userNames []string) [][]byte {
 	list := make([][]byte, len(userNames))
 	for i, n := range userNames {
-		userDto := dto.UserDto{
+		userDto := dto.UserReceiveDto{
 			Id:   1,
 			Name: n,
 		}

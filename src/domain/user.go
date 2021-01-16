@@ -95,11 +95,10 @@ func (u User) GetPassword() string {
 	Conversion
 **************************************/
 
-func (u User) ToDto() *dto.UserDto {
-	return &dto.UserDto{
+func (u User) ToDto() *dto.UserResDto {
+	return &dto.UserResDto{
 		Id:       u.id.GetValue(),
 		Name:     u.name,
-		Password: u.password,
 	}
 }
 

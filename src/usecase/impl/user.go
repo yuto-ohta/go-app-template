@@ -19,19 +19,19 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
-func (u UserUseCaseImpl) GetUser(id int) (dto.UserDto, error) {
+func (u UserUseCaseImpl) GetUser(id int) (dto.UserResDto, error) {
 	var err error
 
 	//get userId
 	var userId *valueobject.UserId
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	// find user
 	var found domain.User
 	if found, err = u.userRepository.FindById(*userId); err != nil {
-		return dto.UserDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
 	return *found.ToDto(), nil
@@ -58,7 +58,7 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 	}
 
 	// make userDtoList
-	var dtoList []dto.UserDto
+	var dtoList []dto.UserResDto
 	if dtoList, err = makeUserDtoListFromPage(userPage); err != nil {
 		return dto.UserPage{}, apperror.NewAppError(err)
 	}
@@ -78,66 +78,66 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 	return userPageDto, nil
 }
 
-func (u UserUseCaseImpl) CreateUser(userDto dto.UserDto) (dto.UserDto, error) {
+func (u UserUseCaseImpl) CreateUser(userDto dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
 	// get user domain
 	var newUser *domain.User
 	if newUser, err = domain.NewUserBuilder().Name(userDto.Name).Password(userDto.Password).Build(); err != nil {
-		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	// create user
 	var created domain.User
 	if created, err = u.userRepository.CreateUser(*newUser); err != nil {
-		return dto.UserDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
 	return *created.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserDto, error) {
+func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserResDto, error) {
 	var err error
 
 	// get userId
 	var userId *valueobject.UserId
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	// delete user
 	var deleted domain.User
 	if deleted, err = u.userRepository.DeleteUser(*userId); err != nil {
-		return dto.UserDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
 	return *deleted.ToDto(), nil
 }
 
-func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserDto) (dto.UserDto, error) {
+func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
 	// get userId
 	var userId *valueobject.UserId
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	// 存在チェック
 	if _, err = u.userRepository.FindById(*userId); err != nil {
-		return dto.UserDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
 	// get user domain
 	var newUser *domain.User
 	if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(user.Password).Build(); err != nil {
-		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
 	// update user
 	var updated domain.User
 	if updated, err = u.userRepository.UpdateUser(*userId, *newUser); err != nil {
-		return dto.UserDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
 	return *updated.ToDto(), nil
@@ -161,12 +161,12 @@ func makeUserPage(page int, limit int, target []domain.User) (appmodel.Page, err
 	return *userPage, nil
 }
 
-func makeUserDtoListFromPage(userPage appmodel.Page) ([]dto.UserDto, error) {
-	dtoList := make([]dto.UserDto, len(userPage.GetList()))
+func makeUserDtoListFromPage(userPage appmodel.Page) ([]dto.UserResDto, error) {
+	dtoList := make([]dto.UserResDto, len(userPage.GetList()))
 	for i, e := range userPage.GetList() {
 		userDomain, ok := e.(domain.User)
 		if !ok {
-			return []dto.UserDto{}, apperror.NewAppErrorWithStatus(fmt.Errorf("型アサーションエラー\nfrom: %v\nto: domain.User", e), http.StatusInternalServerError)
+			return []dto.UserResDto{}, apperror.NewAppErrorWithStatus(fmt.Errorf("型アサーションエラー\nfrom: %v\nto: domain.User", e), http.StatusInternalServerError)
 		}
 		userDto := userDomain.ToDto()
 		dtoList[i] = *userDto

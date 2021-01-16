@@ -6,9 +6,9 @@ import (
 )
 
 type UserUseCase interface {
-	GetUser(id int) (dto.UserDto, error)
+	GetUser(id int) (dto.UserResDto, error)
 	GetAllUser(condition appmodel.SearchCondition) (dto.UserPage, error)
-	CreateUser(userDto dto.UserDto) (dto.UserDto, error)
-	DeleteUser(id int) (dto.UserDto, error)
-	UpdateUser(id int, user dto.UserDto) (dto.UserDto, error)
+	CreateUser(userDto dto.UserReceiveDto) (dto.UserResDto, error)
+	DeleteUser(id int) (dto.UserResDto, error)
+	UpdateUser(id int, user dto.UserReceiveDto) (dto.UserResDto, error)
 }

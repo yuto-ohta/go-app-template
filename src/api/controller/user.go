@@ -37,7 +37,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	}
 
 	// get user
-	var user dto.UserDto
+	var user dto.UserResDto
 	if user, err = u.userUseCase.GetUser(id); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
@@ -108,7 +108,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	var err error
 
 	// get userDto
-	var userDto dto.UserDto
+	var userDto dto.UserReceiveDto
 	if err = c.Bind(&userDto); err != nil {
 		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 		return apperror.ResponseErrorJSON(c, appErr, message.StatusBadRequest)
@@ -118,7 +118,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	}
 
 	// register user
-	var user dto.UserDto
+	var user dto.UserResDto
 	if user, err = u.userUseCase.CreateUser(userDto); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
@@ -141,7 +141,7 @@ func (u UserController) DeleteUser(c echo.Context) error {
 	}
 
 	// delete user
-	var user dto.UserDto
+	var user dto.UserResDto
 	if user, err = u.userUseCase.DeleteUser(id); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
@@ -169,7 +169,7 @@ func (u UserController) UpdateUser(c echo.Context) error {
 	}
 
 	// get userDto
-	var newUser dto.UserDto
+	var newUser dto.UserReceiveDto
 	if err = c.Bind(&newUser); err != nil {
 		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 		return apperror.ResponseErrorJSON(c, appErr, message.StatusBadRequest)
@@ -179,7 +179,7 @@ func (u UserController) UpdateUser(c echo.Context) error {
 	}
 
 	// update user
-	var updated dto.UserDto
+	var updated dto.UserResDto
 	if updated, err = u.userUseCase.UpdateUser(id, newUser); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {

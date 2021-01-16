@@ -12,17 +12,22 @@ import (
 
 var validate = validator.New()
 
-type UserDto struct {
+type UserReceiveDto struct {
 	Id       int    `json:"id"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
+}
+
+type UserResDto struct {
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
 }
 
 /**************************************
 	Validation
 **************************************/
 
-func (u UserDto) Validate() error {
+func (u UserReceiveDto) Validate() error {
 	if err := validateId(u.Id); err != nil {
 		return apperror.NewAppError(err)
 	}

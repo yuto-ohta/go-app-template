@@ -1,8 +1,8 @@
 package dto
 
 type UserPage struct {
-	Users    []UserDto `json:"users"`
-	PageInfo PageInfo  `json:"pageInfo"`
+	Users    []UserResDto `json:"users"`
+	PageInfo PageInfo     `json:"pageInfo"`
 }
 
 type UserSortColumn int
