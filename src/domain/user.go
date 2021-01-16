@@ -6,6 +6,7 @@ import (
 	"go-app-template/src/apperror"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase/appmodel"
+	"golang.org/x/crypto/bcrypt"
 	"sort"
 
 	"github.com/go-playground/validator/v10"
@@ -14,7 +15,7 @@ import (
 var _validate = validator.New()
 
 const (
-	_nameNotAllocated = ""
+	_nameNotAllocated     = ""
 	_passwordNotAllocated = ""
 )
 
@@ -71,8 +72,30 @@ func (b *UserBuilder) Build() (*User, error) {
 		if err := user.validatePassword(); err != nil {
 			return nil, apperror.NewAppError(err)
 		}
+		// hash化して詰め直す
+		if err := encryptUserPassword(b.user); err != nil {
+			return nil, apperror.NewAppError(err)
+		}
 	}
 	return b.user, nil
+}
+
+func encryptUserPassword(user *User) error {
+	hashedStr, err := generatePasswordHash(user.password)
+	if err != nil {
+		return apperror.NewAppError(err)
+	}
+	user.password = hashedStr
+	return nil
+}
+
+func generatePasswordHash(password string) (string, error) {
+	const cost = 10
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), cost)
+	if err != nil {
+		return "", apperror.NewAppError(err)
+	}
+	return string(hashed), nil
 }
 
 /**************************************
@@ -97,8 +120,8 @@ func (u User) GetPassword() string {
 
 func (u User) ToDto() *dto.UserResDto {
 	return &dto.UserResDto{
-		Id:       u.id.GetValue(),
-		Name:     u.name,
+		Id:   u.id.GetValue(),
+		Name: u.name,
 	}
 }
 
