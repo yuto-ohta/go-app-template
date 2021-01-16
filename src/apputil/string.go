@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 func RemoveSpace(str string) string {
@@ -32,4 +33,14 @@ func QueryEncoding(str string) string {
 	str = url.QueryEscape(str)
 	str = regexp.MustCompile(`([^%])(\+)`).ReplaceAllString(str, "$1%20")
 	return str
+}
+
+// 伏せ字にする
+func HideWords(str string) string {
+	length := utf8.RuneCountInString(str)
+	res := ""
+	for i := 0; i < length; i++ {
+		res = res + "●"
+	}
+	return res
 }
