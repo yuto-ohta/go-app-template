@@ -125,11 +125,18 @@ func (u User) validateName() error {
 	return nil
 }
 
-// TODO: 正しいvalidationにする
 func (u User) validatePassword() error {
-	rules := "min=1,max=8"
-	if err := _validate.Var(u.name, rules); err != nil {
-		return apperror.NewAppError(err)
+	if err := _validate.Var(u.name, "containsany=abcdefghijklmnopqrstuvwsyz"); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに小文字のアルファベットを入れてください, password: %v`, u.name))
+	}
+	if err := _validate.Var(u.name, "containsany=ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに大文字のアルファベットを入れてください, password: %v`, u.name))
+	}
+	if err := _validate.Var(u.name, "containsany=0123456789"); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに数字を入れてください, password: %v`, u.name))
+	}
+	if err := _validate.Var(u.name, "min=8"); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordは8文字以上にしてください, password: %v`, u.name))
 	}
 	return nil
 }
