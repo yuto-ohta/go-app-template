@@ -21,8 +21,9 @@ const (
 )
 
 type User struct {
-	id   valueobject.UserId
-	name string
+	id       valueobject.UserId
+	name     string
+	password string
 }
 
 type userSortColumn int
@@ -35,16 +36,16 @@ func (u userSortColumn) string() string {
 	return messages[u]
 }
 
-func NewUser(name string) (*User, error) {
-	user := &User{id: *valueobject.NewUserId(), name: name}
+func NewUser(name string, password string) (*User, error) {
+	user := &User{id: *valueobject.NewUserId(), name: name, password: password}
 	if err := user.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 	return user, nil
 }
 
-func NewUserWithUserId(id valueobject.UserId, name string) (*User, error) {
-	user := &User{id: id, name: name}
+func NewUserWithUserId(id valueobject.UserId, name string, password string) (*User, error) {
+	user := &User{id: id, name: name, password: password}
 	if err := user.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
@@ -59,10 +60,15 @@ func (u User) GetName() string {
 	return u.name
 }
 
+func (u User) GetPassword() string {
+	return u.password
+}
+
 func (u User) ToDto() *dto.UserDto {
 	return &dto.UserDto{
-		Id:   u.id.GetValue(),
-		Name: u.name,
+		Id:       u.id.GetValue(),
+		Name:     u.name,
+		Password: u.password,
 	}
 }
 

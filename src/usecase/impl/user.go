@@ -78,12 +78,12 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 	return userPageDto, nil
 }
 
-func (u UserUseCaseImpl) CreateUser(userName string) (dto.UserDto, error) {
+func (u UserUseCaseImpl) CreateUser(userName string, password string) (dto.UserDto, error) {
 	var err error
 
 	// get user domain
 	var newUser *domain.User
-	if newUser, err = domain.NewUser(userName); err != nil {
+	if newUser, err = domain.NewUser(userName, password); err != nil {
 		return dto.UserDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 

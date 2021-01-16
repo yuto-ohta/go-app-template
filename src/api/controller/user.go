@@ -101,7 +101,7 @@ func (u UserController) GetAllUser(c echo.Context) error {
 
 /*
 	ユーザーを新規登録する
-	@body_param name: userName
+	@body_param name: userName, password: password
 	@return user
 */
 func (u UserController) CreateUser(c echo.Context) error {
@@ -119,7 +119,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 
 	// register user
 	var user dto.UserDto
-	if user, err = u.userUseCase.CreateUser(userDto.Name); err != nil {
+	if user, err = u.userUseCase.CreateUser(userDto.Name, userDto.Password); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
 

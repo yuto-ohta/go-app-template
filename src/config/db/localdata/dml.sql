@@ -1,11 +1,11 @@
-INSERT INTO `users` (`name`) VALUES
-('まるお'),
-('トマト君'),
-('マスク侍'),
-('腕時計両腕ちゃん'),
-('わたしの中の悪魔'),
-('眠り姫'),
-('べらぼう太郎'),
-('ジョン'),
-('サンタクロース'),
-('先生');
+INSERT INTO `users` (`name`, `password`) VALUES
+('まるお', 'password'),
+('トマト君', 'password'),
+('マスク侍', 'password'),
+('腕時計両腕ちゃん', 'password'),
+('わたしの中の悪魔', 'password'),
+('眠り姫', 'password'),
+('べらぼう太郎', 'password'),
+('ジョン', 'password'),
+('サンタクロース', 'password'),
+('先生', 'password');

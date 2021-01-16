@@ -13,8 +13,9 @@ import (
 var validate = validator.New()
 
 type UserDto struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 func (u UserDto) Validate() error {
