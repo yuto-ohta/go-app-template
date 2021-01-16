@@ -64,12 +64,12 @@ func (b *UserBuilder) Build() (*User, error) {
 		return nil, apperror.NewAppError(err)
 	}
 	if user.isNameAllocated() {
-		if err := user.validateName(); err != nil {
+		if err := user.ValidateName(); err != nil {
 			return nil, apperror.NewAppError(err)
 		}
 	}
 	if user.isPasswordAllocated() {
-		if err := user.validatePassword(); err != nil {
+		if err := user.ValidatePassword(); err != nil {
 			return nil, apperror.NewAppError(err)
 		}
 		// hash化して詰め直す
@@ -121,16 +121,16 @@ func (u User) ToDto() *dto.UserResDto {
 **************************************/
 
 func (u User) Validate() error {
-	if err := u.validateName(); err != nil {
+	if err := u.ValidateName(); err != nil {
 		return apperror.NewAppError(err)
 	}
-	if err := u.validatePassword(); err != nil {
+	if err := u.ValidatePassword(); err != nil {
 		return apperror.NewAppError(err)
 	}
 	return u.GetId().Validate()
 }
 
-func (u User) validateName() error {
+func (u User) ValidateName() error {
 	rules := "min=1,max=8"
 	if err := _validate.Var(u.name, rules); err != nil {
 		return apperror.NewAppError(err)
@@ -138,7 +138,7 @@ func (u User) validateName() error {
 	return nil
 }
 
-func (u User) validatePassword() error {
+func (u User) ValidatePassword() error {
 	if err := _validate.Var(u.name, "containsany=abcdefghijklmnopqrstuvwsyz"); err != nil {
 		return apperror.NewAppError(fmt.Errorf(`passwordに小文字のアルファベットを入れてください, password: %v`, u.name))
 	}

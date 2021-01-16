@@ -19,8 +19,8 @@ type UserReceiveDto struct {
 }
 
 type UserResDto struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 /**************************************
@@ -28,19 +28,19 @@ type UserResDto struct {
 **************************************/
 
 func (u UserReceiveDto) Validate() error {
-	if err := validateId(u.Id); err != nil {
+	if err := ValidateId(u.Id); err != nil {
 		return apperror.NewAppError(err)
 	}
-	if err := validateName(u.Name); err != nil {
+	if err := ValidateName(u.Name); err != nil {
 		return apperror.NewAppError(err)
 	}
-	if err := validatePassword(u.Password); err != nil {
+	if err := ValidatePassword(u.Password); err != nil {
 		return apperror.NewAppError(err)
 	}
 	return nil
 }
 
-func validateId(id int) error {
+func ValidateId(id int) error {
 	rules := "omitempty,gte=1"
 	if err := validate.Var(id, rules); err != nil {
 		return apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
@@ -48,7 +48,7 @@ func validateId(id int) error {
 	return nil
 }
 
-func validateName(name string) error {
+func ValidateName(name string) error {
 	// 空文字はNG
 	if name == "" {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"が空文字になっています, userName: %v`, name), http.StatusBadRequest)
@@ -67,7 +67,7 @@ func validateName(name string) error {
 	return nil
 }
 
-func validatePassword(password string) error {
+func ValidatePassword(password string) error {
 	// 空文字はNG
 	if password == "" {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`"password"が空文字になっています, password: %v`, password), http.StatusBadRequest)

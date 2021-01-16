@@ -107,7 +107,7 @@ func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, erro
 func (u UserRepositoryImpl) UpdateUser(id valueobject.UserId, user domain.User) (domain.User, error) {
 	var err error
 
-	// ID以外を新しい値にする
+	// 新しい値にuserIdを詰める
 	newUser := dbmodel.NewUserModel(user)
 	newUser.ID = id.GetValue()
 

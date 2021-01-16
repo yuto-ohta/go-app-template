@@ -123,15 +123,29 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserRe
 		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 
-	// 存在チェック
-	if _, err = u.userRepository.FindById(*userId); err != nil {
+	// get oldParams
+	var oldParams domain.User
+	if oldParams, err = u.userRepository.FindById(*userId); err != nil {
 		return dto.UserResDto{}, apperror.NewAppError(err)
 	}
 
-	// get user domain
+	// get new userDomain
 	var newUser *domain.User
-	if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(user.Password).Build(); err != nil {
-		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	// ユーザー名 && パスワード 両方変更する場合
+	if len(user.Name) != 0 && len(user.Password) != 0 {
+		if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(user.Password).Build(); err != nil {
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		}
+		// ユーザー名のみ変更する場合
+	} else if len(user.Name) != 0 {
+		if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(oldParams.GetPassword()).Build(); err != nil {
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		}
+		// パスワードのみ変更する場合
+	} else {
+		if newUser, err = domain.NewUserBuilder().Name(oldParams.GetName()).Password(user.Password).Build(); err != nil {
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		}
 	}
 
 	// update user

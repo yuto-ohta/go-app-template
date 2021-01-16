@@ -169,18 +169,14 @@ func (u UserController) UpdateUser(c echo.Context) error {
 	}
 
 	// get userDto
-	var newUser dto.UserReceiveDto
-	if err = c.Bind(&newUser); err != nil {
-		appErr := apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
-		return apperror.ResponseErrorJSON(c, appErr, message.StatusBadRequest)
-	}
-	if err = newUser.Validate(); err != nil {
+	var newUser *dto.UserReceiveDto
+	if newUser, err = getUpdateUserBodyParam(c); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
 	}
 
 	// update user
 	var updated dto.UserResDto
-	if updated, err = u.userUseCase.UpdateUser(id, newUser); err != nil {
+	if updated, err = u.userUseCase.UpdateUser(id, *newUser); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
 			return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
@@ -259,4 +255,26 @@ func getOptionalOrderParam(param string) (appmodel.Order, error) {
 	}
 
 	return order, nil
+}
+
+func getUpdateUserBodyParam(c echo.Context) (*dto.UserReceiveDto, error) {
+	var err error
+	var receiveDto *dto.UserReceiveDto
+	if err = c.Bind(&receiveDto); err != nil {
+		return nil, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	}
+	// ユーザー名 && パスワード が両方取得できない場合はNG
+	if len(receiveDto.Name) == 0 && len(receiveDto.Password) == 0 {
+		appErr := apperror.NewAppErrorWithStatus(fmt.Errorf("ユーザー名・パスワードが取得できません"), http.StatusBadRequest)
+		return nil, appErr
+	}
+	// ユーザー名がある場合のValidation
+	if err = dto.ValidateName(receiveDto.Name); err != nil && len(receiveDto.Name) != 0 {
+		return nil, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	}
+	// パスワードがある場合のValidation
+	if err = dto.ValidatePassword(receiveDto.Password); err != nil && len(receiveDto.Password) != 0 {
+		return nil, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	}
+	return receiveDto, nil
 }
