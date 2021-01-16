@@ -22,11 +22,11 @@ func NewUserController(useCase usecase.UserUseCase) *UserController {
 	return &UserController{userUseCase: useCase}
 }
 
-/*
+/**************************************
 	ユーザーをuserIdで取得する
 	@path_param id: userId
 	@return user
-*/
+**************************************/
 func (u UserController) GetUser(c echo.Context) error {
 	var err error
 
@@ -49,14 +49,14 @@ func (u UserController) GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-/*
+/**************************************
 	ユーザーを全件取得する(オプション: orderBy, order, page, limit)
 	@query_param orderBy
 	@query_param order
 	@query_param page
 	@query_param limit
 	@return users
-*/
+**************************************/
 func (u UserController) GetAllUser(c echo.Context) error {
 	var err error
 
@@ -99,11 +99,11 @@ func (u UserController) GetAllUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, userPage)
 }
 
-/*
+/**************************************
 	ユーザーを新規登録する
 	@body_param name: userName, password: password
 	@return user
-*/
+**************************************/
 func (u UserController) CreateUser(c echo.Context) error {
 	var err error
 
@@ -126,11 +126,11 @@ func (u UserController) CreateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-/*
+/**************************************
 	ユーザーを削除する
 	@path_param id: userId
 	@return user
-*/
+**************************************/
 func (u UserController) DeleteUser(c echo.Context) error {
 	var err error
 
@@ -153,12 +153,12 @@ func (u UserController) DeleteUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-/*
+/**************************************
 	ユーザーを更新する
 	@path_param id: userId
 	@body_param name: userName, password: password
 	@return user
-*/
+**************************************/
 func (u UserController) UpdateUser(c echo.Context) error {
 	var err error
 
@@ -187,6 +187,9 @@ func (u UserController) UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, updated)
 }
 
+/**************************************
+	private
+**************************************/
 func getUserIdParam(param string) (int, error) {
 	id, err := strconv.Atoi(param)
 
