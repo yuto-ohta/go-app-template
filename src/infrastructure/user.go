@@ -5,7 +5,7 @@ import (
 	"go-app-template/src/config/db"
 	"go-app-template/src/domain"
 	"go-app-template/src/domain/valueobject"
-	"go-app-template/src/infrastructure/model"
+	"go-app-template/src/infrastructure/dbmodel"
 	"net/http"
 
 	"gorm.io/gorm"
@@ -22,7 +22,7 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	var err error
 
 	// SQL実行
-	var userModel model.User
+	var userModel dbmodel.User
 	result := db.Conn.Raw("SELECT * FROM users WHERE id = ?", id.GetValue()).Scan(&userModel)
 	if err = result.Error; err != nil {
 		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
@@ -46,7 +46,7 @@ func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
 	var err error
 
 	// SQL実行
-	var userModelList []model.User
+	var userModelList []dbmodel.User
 	result := db.Conn.Find(&userModelList)
 	if err = result.Error; err != nil {
 		return []domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
@@ -67,7 +67,9 @@ func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
 
 func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	var err error
-	userModel := model.User{Name: user.GetName()}
+
+	// get user model
+	userModel := dbmodel.User{Name: user.GetName(), Password: user.GetPassword()}
 
 	// SQL実行
 	result := db.Conn.Create(&userModel)
@@ -94,7 +96,7 @@ func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, erro
 	}
 
 	// SQL実行
-	result := db.Conn.Delete(&model.User{}, id.GetValue())
+	result := db.Conn.Delete(&dbmodel.User{}, id.GetValue())
 	if err = result.Error; err != nil {
 		return domain.User{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
@@ -106,7 +108,7 @@ func (u UserRepositoryImpl) UpdateUser(id valueobject.UserId, user domain.User) 
 	var err error
 
 	// ID以外を新しい値にする
-	newUser := model.NewUserModel(user)
+	newUser := dbmodel.NewUserModel(user)
 	newUser.ID = id.GetValue()
 
 	// SQL実行

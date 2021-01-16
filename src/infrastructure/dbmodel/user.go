@@ -1,4 +1,4 @@
-package model
+package dbmodel
 
 import (
 	"go-app-template/src/apperror"
@@ -7,14 +7,16 @@ import (
 )
 
 type User struct {
-	ID   int
-	Name string
+	ID       int
+	Name     string
+	Password string
 }
 
 func NewUserModel(user domain.User) User {
 	return User{
-		ID:   user.GetId().GetValue(),
-		Name: user.GetName(),
+		ID:       user.GetId().GetValue(),
+		Name:     user.GetName(),
+		Password: user.GetPassword(),
 	}
 }
 
@@ -29,7 +31,7 @@ func (u User) ToDomain() (*domain.User, error) {
 		return nil, apperror.NewAppError(err)
 	}
 
-	if user, err = domain.NewUserWithUserId(*userId, u.Name); err != nil {
+	if user, err = domain.NewUserWithUserId(*userId, u.Name, u.Password); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 
