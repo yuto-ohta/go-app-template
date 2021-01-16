@@ -11,13 +11,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var (
-	validate = validator.New()
-)
+var _validate = validator.New()
 
 const (
-	id userSortColumn = iota + 1
-	userName
+	_nameNotAllocated = ""
+	_passwordNotAllocated = ""
 )
 
 type User struct {
@@ -26,31 +24,60 @@ type User struct {
 	password string
 }
 
-type userSortColumn int
+/**************************************
+	Builder
+**************************************/
 
-func (u userSortColumn) string() string {
-	var messages = map[userSortColumn]string{
-		id:       "id",
-		userName: "name",
-	}
-	return messages[u]
+type UserBuilder struct {
+	user *User
 }
 
-func NewUser(name string, password string) (*User, error) {
-	user := &User{id: *valueobject.NewUserId(), name: name, password: password}
-	if err := user.Validate(); err != nil {
+func NewUserBuilder() *UserBuilder {
+	user := &User{
+		id:       *valueobject.NewUserId(),
+		name:     _nameNotAllocated,
+		password: _passwordNotAllocated,
+	}
+	b := &UserBuilder{user: user}
+	return b
+}
+
+func (b *UserBuilder) Id(id valueobject.UserId) *UserBuilder {
+	b.user.id = id
+	return b
+}
+
+func (b *UserBuilder) Name(name string) *UserBuilder {
+	b.user.name = name
+	return b
+}
+
+func (b *UserBuilder) Password(password string) *UserBuilder {
+	b.user.password = password
+	return b
+}
+
+func (b *UserBuilder) Build() (*User, error) {
+	user := b.user
+	if err := user.id.Validate(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
-	return user, nil
+	if user.isNameAllocated() {
+		if err := user.validateName(); err != nil {
+			return nil, apperror.NewAppError(err)
+		}
+	}
+	if user.isPasswordAllocated() {
+		if err := user.validatePassword(); err != nil {
+			return nil, apperror.NewAppError(err)
+		}
+	}
+	return b.user, nil
 }
 
-func NewUserWithUserId(id valueobject.UserId, name string, password string) (*User, error) {
-	user := &User{id: id, name: name, password: password}
-	if err := user.Validate(); err != nil {
-		return nil, apperror.NewAppError(err)
-	}
-	return user, nil
-}
+/**************************************
+	Getter & Setter
+**************************************/
 
 func (u User) GetId() valueobject.UserId {
 	return u.id
@@ -64,6 +91,10 @@ func (u User) GetPassword() string {
 	return u.password
 }
 
+/**************************************
+	Conversion
+**************************************/
+
 func (u User) ToDto() *dto.UserDto {
 	return &dto.UserDto{
 		Id:       u.id.GetValue(),
@@ -72,8 +103,15 @@ func (u User) ToDto() *dto.UserDto {
 	}
 }
 
+/**************************************
+	Validation
+**************************************/
+
 func (u User) Validate() error {
 	if err := u.validateName(); err != nil {
+		return apperror.NewAppError(err)
+	}
+	if err := u.validatePassword(); err != nil {
 		return apperror.NewAppError(err)
 	}
 	return u.GetId().Validate()
@@ -81,11 +119,39 @@ func (u User) Validate() error {
 
 func (u User) validateName() error {
 	rules := "min=1,max=8"
-	if err := validate.Var(u.name, rules); err != nil {
+	if err := _validate.Var(u.name, rules); err != nil {
 		return apperror.NewAppError(err)
 	}
 	return nil
 }
+
+// TODO: 正しいvalidationにする
+func (u User) validatePassword() error {
+	rules := "min=1,max=8"
+	if err := _validate.Var(u.name, rules); err != nil {
+		return apperror.NewAppError(err)
+	}
+	return nil
+}
+
+func (u User) isNameAllocated() bool {
+	return u.name != _nameNotAllocated
+}
+
+func (u User) isPasswordAllocated() bool {
+	return u.name != _passwordNotAllocated
+}
+
+/**************************************
+	Sort
+**************************************/
+
+const (
+	_id userSortColumn = iota + 1
+	_userName
+)
+
+type userSortColumn int
 
 func Sort(orderBy string, order appmodel.Order, target []User) error {
 	var err error
@@ -96,12 +162,20 @@ func Sort(orderBy string, order appmodel.Order, target []User) error {
 	}
 
 	switch sortColumn {
-	case userName:
+	case _userName:
 		sortByUserName(order, target)
 	default:
 		sortById(order, target)
 	}
 	return nil
+}
+
+func (u userSortColumn) string() string {
+	var messages = map[userSortColumn]string{
+		_id:       "id",
+		_userName: "name",
+	}
+	return messages[u]
 }
 
 func sortById(order appmodel.Order, target []User) {
@@ -130,10 +204,10 @@ func sortByUserName(order appmodel.Order, target []User) {
 
 func getSortColumn(param string) (userSortColumn, error) {
 	switch param {
-	case id.string():
-		return id, nil
-	case userName.string():
-		return userName, nil
+	case _id.string():
+		return _id, nil
+	case _userName.string():
+		return _userName, nil
 	default:
 		return -1, apperror.NewAppError(fmt.Errorf("指定のColumnはソートに使用できるものではありません, param: %v", param))
 	}

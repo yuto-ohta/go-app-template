@@ -31,7 +31,7 @@ func (u User) ToDomain() (*domain.User, error) {
 		return nil, apperror.NewAppError(err)
 	}
 
-	if user, err = domain.NewUserWithUserId(*userId, u.Name, u.Password); err != nil {
+	if user, err = domain.NewUserBuilder().Id(*userId).Name(u.Name).Password(u.Password).Build(); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 

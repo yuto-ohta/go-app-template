@@ -119,7 +119,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 
 	// register user
 	var user dto.UserDto
-	if user, err = u.userUseCase.CreateUser(userDto.Name, userDto.Password); err != nil {
+	if user, err = u.userUseCase.CreateUser(userDto); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.CreateUserFailed)
 	}
 
@@ -156,7 +156,7 @@ func (u UserController) DeleteUser(c echo.Context) error {
 /*
 	ユーザーを更新する
 	@path_param id: userId
-	@body_param name: userName
+	@body_param name: userName, password: password
 	@return user
 */
 func (u UserController) UpdateUser(c echo.Context) error {
