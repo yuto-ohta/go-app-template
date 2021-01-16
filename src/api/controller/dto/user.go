@@ -19,17 +19,17 @@ type UserDto struct {
 }
 
 func (u UserDto) Validate() error {
-	if err := ValidateId(u.Id); err != nil {
+	if err := validateId(u.Id); err != nil {
 		return apperror.NewAppError(err)
 	}
-	if err := ValidateName(u.Name); err != nil {
+	if err := validateName(u.Name); err != nil {
 		return apperror.NewAppError(err)
 	}
 
 	return nil
 }
 
-func ValidateId(id int) error {
+func validateId(id int) error {
 	rules := "omitempty,gte=1"
 	if err := validate.Var(id, rules); err != nil {
 		return apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
@@ -37,7 +37,7 @@ func ValidateId(id int) error {
 	return nil
 }
 
-func ValidateName(name string) error {
+func validateName(name string) error {
 	// 空文字はNG
 	if name == "" {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`"userName"が空文字になっています, userName: %v`, name), http.StatusBadRequest)
