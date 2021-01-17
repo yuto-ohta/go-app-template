@@ -21,19 +21,13 @@ func NewUserModel(user domain.User) User {
 }
 
 func (u User) ToDomain() (*domain.User, error) {
-	var (
-		err    error
-		userId *valueobject.UserId
-		user   *domain.User
-	)
+	var err error
 
+	var userId *valueobject.UserId
 	if userId, err = valueobject.NewUserIdWithId(u.ID); err != nil {
 		return nil, apperror.NewAppError(err)
 	}
 
-	if user, err = domain.NewUserBuilder().Id(*userId).Name(u.Name).Password(u.Password).Build(); err != nil {
-		return nil, apperror.NewAppError(err)
-	}
-
+	user := domain.NewUserBuilder().Id(*userId).Name(u.Name).Password(u.Password).BuildWithoutValidateAndEncrypt()
 	return user, nil
 }

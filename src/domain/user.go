@@ -7,6 +7,7 @@ import (
 	"go-app-template/src/apputil"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase/appmodel"
+	"net/http"
 	"sort"
 
 	"github.com/go-playground/validator/v10"
@@ -73,11 +74,15 @@ func (b *UserBuilder) Build() (*User, error) {
 			return nil, apperror.NewAppError(err)
 		}
 		// hash化して詰め直す
-		if err := encryptUserPassword(b.user); err != nil {
+		if err := encryptUserPassword(user); err != nil {
 			return nil, apperror.NewAppError(err)
 		}
 	}
-	return b.user, nil
+	return user, nil
+}
+
+func (b *UserBuilder) BuildWithoutValidateAndEncrypt() *User {
+	return b.user
 }
 
 func encryptUserPassword(user *User) error {
@@ -103,6 +108,14 @@ func (u User) GetName() string {
 
 func (u User) GetPassword() string {
 	return u.password
+}
+
+func (u *User) SetName(name string) error {
+	if err := u.ValidateName(); err != nil {
+		return apperror.NewAppError(err)
+	}
+	u.name = name
+	return nil
 }
 
 /**************************************
@@ -139,17 +152,22 @@ func (u User) ValidateName() error {
 }
 
 func (u User) ValidatePassword() error {
-	if err := _validate.Var(u.name, "containsany=abcdefghijklmnopqrstuvwsyz"); err != nil {
-		return apperror.NewAppError(fmt.Errorf(`passwordに小文字のアルファベットを入れてください, password: %v`, u.name))
+	const PasswordAllowedStr = apputil.UpCaseAlphabet + apputil.DownCaseAlphabet + apputil.Number
+
+	if err := _validate.Var(u.password, fmt.Sprintf("containsany=%v", apputil.DownCaseAlphabet)); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに小文字のアルファベットを入れてください, password: %v`, u.password))
 	}
-	if err := _validate.Var(u.name, "containsany=ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
-		return apperror.NewAppError(fmt.Errorf(`passwordに大文字のアルファベットを入れてください, password: %v`, u.name))
+	if err := _validate.Var(u.password, fmt.Sprintf("containsany=%v", apputil.UpCaseAlphabet)); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに大文字のアルファベットを入れてください, password: %v`, u.password))
 	}
-	if err := _validate.Var(u.name, "containsany=0123456789"); err != nil {
-		return apperror.NewAppError(fmt.Errorf(`passwordに数字を入れてください, password: %v`, u.name))
+	if err := _validate.Var(u.password, fmt.Sprintf("containsany=%v", apputil.Number)); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordに数字を入れてください, password: %v`, u.password))
 	}
-	if err := _validate.Var(u.name, "min=8"); err != nil {
-		return apperror.NewAppError(fmt.Errorf(`passwordは8文字以上にしてください, password: %v`, u.name))
+	if err := _validate.Var(u.password, "min=8"); err != nil {
+		return apperror.NewAppError(fmt.Errorf(`passwordは8文字以上にしてください, password: %v`, u.password))
+	}
+	if !apputil.ContainsAllowedStrOnly(u.password, PasswordAllowedStr) {
+		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordには英数大文字小文字以外を含めることはできません, password: %v`, u.password), http.StatusBadRequest)
 	}
 	return nil
 }

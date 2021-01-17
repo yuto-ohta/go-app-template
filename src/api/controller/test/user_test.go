@@ -7,7 +7,6 @@ import (
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
-	"go-app-template/src/apputil"
 	"go-app-template/src/config/db/localdata"
 	"go-app-template/src/config/route"
 	"go-app-template/src/infrastructure"
@@ -70,6 +69,9 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+/**************************************
+	ユーザー取得
+**************************************/
 func TestUserController_GetUser_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParam{
@@ -116,6 +118,9 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+/**************************************
+	ユーザー全件取得
+**************************************/
 func TestUserController_GetAllUser_正常系(t *testing.T) {
 	// setup
 	params := []struct {
@@ -311,7 +316,7 @@ func TestUserController_GetAllUser_正常系(t *testing.T) {
 		expectedCode := http.StatusOK
 		expectedPageInfo := p.expectedPageInfo
 		expectedLen := p.expectedLen
-		expectedBodyFirst := dto.UserReceiveDto{
+		expectedBodyFirst := dto.UserResDto{
 			Id:   p.base.expectedUserIdInt,
 			Name: p.base.expectedName,
 		}
@@ -378,20 +383,24 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+/**************************************
+	ユーザー登録
+**************************************/
 func TestUserController_CreateUser_正常系(t *testing.T) {
 	// setup
 	const initializedLocalDataRecordCounts = 10
 	expectedUserIdInt := initializedLocalDataRecordCounts + 1
 	var params = []statusOKCheckParam{
+		// TODO: パスワードのチェック
 		{
 			"正常にユーザーが登録されること",
-			input{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎"}`)},
+			input{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"Test1111"}`)},
 			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
 		{
 			"userIdに既存の値が指定されているときにも、正常にユーザーが登録されること（userIdが無視されること）",
-			input{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"id":1,"name":"新規ユーザー太郎"}`)},
+			input{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"id":1,"name":"新規ユーザー太郎", "password":"Test1111"}`)},
 			expectedUserIdInt,
 			"新規ユーザー太郎",
 		},
@@ -402,24 +411,64 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 }
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
-	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー\n太郎　"}
+	userNames1 := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー太郎\n"}
+	passwords1 := makeSameStringList(9, "Test1111")
+
+	userNames2 := makeSameStringList(9, "新規ユーザー太郎")
+	passwords2 := []string{" ", "　", "\n", "Test 1111", "Test　1111", "Test\n1111", " Test1111", "Test1111　", " Test1111\n"}
+
+	userNames3 := makeSameStringList(3, "新規ユーザー太郎")
+	passwords3 := []string{"TEST1111", "test1111", "Testaaaa"}
+
+	userNames4 := makeSameStringList(3, "新規ユーザー太郎")
+	passwords4 := []string{"Test1111あ", "Test1111漢字", "Test1111(*"}
 
 	var params = []errorCheckParam{
 		{
 			"userNameが空文字のとき、400になること",
-			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":""}`)}},
+			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"", "password":"Test1111"}`)}},
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserDtoJsonList(userNames))),
+			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserDtoJsonList(userNames1, passwords1))),
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
 		{
 			"userNameが9文字以上のとき、400になること",
-			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"123456789"}`)}},
+			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"123456789", "password":"Test1111"}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが空文字のとき、400になること",
+			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"test", "password":""}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordに半角・全角スペース、改行が含まれているとき、400になること",
+			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserDtoJsonList(userNames2, passwords2))),
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが7文字以下のとき、400になること",
+			[]input{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"Test111"}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
+			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserDtoJsonList(userNames3, passwords3))),
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
+			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserDtoJsonList(userNames4, passwords4))),
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
@@ -429,11 +478,14 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+/**************************************
+	ユーザー削除
+**************************************/
 func TestUserController_DeleteUser_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParam{
 		{
-			"正常にユーザーが削除できること①_レスポンスチェック",
+			"正常にユーザーが削除できること_レスポンスチェック",
 			input{httpMethod: http.MethodDelete, path: "/users/1", body: nil},
 			1,
 			"まるお",
@@ -459,12 +511,28 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 	doErrorCheck(t, params)
 }
 
+/**************************************
+	ユーザー更新
+**************************************/
 func TestUserController_UpdateUser_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParam{
 		{
 			"正常にユーザー名が更新できること",
 			input{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)},
+			1,
+			"ハルキゲニア",
+		},
+		// TODO: パスワードのチェック
+		{
+			"正常にパスワードが更新できること",
+			input{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"HogeHoge123"}`)},
+			1,
+			"まるお",
+		},
+		{
+			"正常にユーザー名とパスワードが更新できること",
+			input{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア", "password":"HogeHoge123"}`)},
 			1,
 			"ハルキゲニア",
 		},
@@ -482,7 +550,17 @@ func TestUserController_UpdateUser_正常系(t *testing.T) {
 
 func TestUserController_UpdateUser_異常系(t *testing.T) {
 	// setup
-	userNames := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー\n太郎　"}
+	userNames1 := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー太郎\n"}
+	passwords1 := makeSameStringList(9, "Test1111")
+
+	userNames2 := makeSameStringList(9, "新規ユーザー太郎")
+	passwords2 := []string{" ", "　", "\n", "Test 1111", "Test　1111", "Test\n1111", " Test1111", "Test1111　", " Test1111\n"}
+
+	userNames3 := makeSameStringList(3, "新規ユーザー太郎")
+	passwords3 := []string{"TEST1111", "test1111", "Testaaaa"}
+
+	userNames4 := makeSameStringList(3, "新規ユーザー太郎")
+	passwords4 := []string{"Test1111あ", "Test1111漢字", "Test1111(*"}
 
 	var params = []errorCheckParam{
 		{
@@ -505,7 +583,7 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 		},
 		{
 			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserDtoJsonList(userNames))),
+			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserDtoJsonList(userNames1, passwords1))),
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
@@ -515,12 +593,57 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 			http.StatusBadRequest,
 			message.StatusBadRequest,
 		},
+		{
+			"passwordが空文字のとき、400になること",
+			[]input{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":""}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordがnilのとき、400になること",
+			[]input{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordに半角・全角スペース、改行が含まれているとき、400になること",
+			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserDtoJsonList(userNames2, passwords2))),
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが7文字以下のとき、400になること",
+			[]input{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"Test111"}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
+			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserDtoJsonList(userNames3, passwords3))),
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
+			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserDtoJsonList(userNames4, passwords4))),
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
+		{
+			"ユーザー名もパスワードも指定されていないとき、400になること",
+			[]input{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{}`)}},
+			http.StatusBadRequest,
+			message.StatusBadRequest,
+		},
 	}
 
 	// check
 	doErrorCheck(t, params)
 }
 
+/**************************************
+	private
+**************************************/
 func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPattern RecordCheckPattern) {
 	for _, p := range params {
 		req := httptest.NewRequest(p.input.httpMethod, p.input.path, p.input.body)
@@ -532,12 +655,12 @@ func doStatusOKCheck(t *testing.T, params []statusOKCheckParam, recordCheckPatte
 
 		// actual
 		actualCode := rec.Code
-		var actualBody dto.UserReceiveDto
+		var actualBody dto.UserResDto
 		_ = json.Unmarshal(rec.Body.Bytes(), &actualBody)
 
 		// expected
 		expectedCode := http.StatusOK
-		expectedBody := &dto.UserReceiveDto{
+		expectedBody := &dto.UserResDto{
 			Id:   p.expectedUserIdInt,
 			Name: p.expectedName,
 		}
@@ -613,19 +736,6 @@ func doRecordNotExistingCheck(t *testing.T, recordId int) {
 	assert.Equal(t, expectedErrMessage, actualErrMessage)
 }
 
-func makePathParamInputs(httpMethod string, pathBase string, pathParams []string, body io.Reader) []input {
-	inputs := make([]input, len(pathParams))
-	for i, p := range pathParams {
-		input := &input{
-			httpMethod: httpMethod,
-			path:       fmt.Sprintf("%v%v", pathBase, apputil.QueryEncoding(p)),
-			body:       body,
-		}
-		inputs[i] = *input
-	}
-	return inputs
-}
-
 func makeInputs(method string, path string, body []io.Reader) []input {
 	inputs := make([]input, len(body))
 	for i, p := range body {
@@ -647,15 +757,24 @@ func makeBodyList(jsonList [][]byte) []io.Reader {
 	return list
 }
 
-func makeUserDtoJsonList(userNames []string) [][]byte {
+func makeUserDtoJsonList(userNames []string, passwords []string) [][]byte {
 	list := make([][]byte, len(userNames))
 	for i, n := range userNames {
 		userDto := dto.UserReceiveDto{
-			Id:   1,
-			Name: n,
+			Id:       1,
+			Name:     n,
+			Password: passwords[i],
 		}
-		j, _ := json.Marshal(userDto)
-		list[i] = j
+		b, _ := json.Marshal(userDto)
+		list[i] = b
 	}
 	return list
+}
+
+func makeSameStringList(length int, str string) []string {
+	res := make([]string, length)
+	for i := 0; i < length; i++ {
+		res[i] = str
+	}
+	return res
 }

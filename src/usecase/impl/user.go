@@ -19,13 +19,16 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 	return &UserUseCaseImpl{userRepository: userRepository}
 }
 
+/**************************************
+	ユーザー取得
+**************************************/
 func (u UserUseCaseImpl) GetUser(id int) (dto.UserResDto, error) {
 	var err error
 
 	//get userId
 	var userId *valueobject.UserId
 	if userId, err = valueobject.NewUserIdWithId(id); err != nil {
-		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
 	// find user
@@ -37,6 +40,9 @@ func (u UserUseCaseImpl) GetUser(id int) (dto.UserResDto, error) {
 	return *found.ToDto(), nil
 }
 
+/**************************************
+	ユーザー全件取得
+**************************************/
 func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.UserPage, error) {
 	var err error
 
@@ -78,24 +84,30 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 	return userPageDto, nil
 }
 
+/**************************************
+	ユーザー登録
+**************************************/
 func (u UserUseCaseImpl) CreateUser(userDto dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
 	// get user domain
 	var newUser *domain.User
 	if newUser, err = domain.NewUserBuilder().Name(userDto.Name).Password(userDto.Password).Build(); err != nil {
-		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
 	// create user
 	var created domain.User
 	if created, err = u.userRepository.CreateUser(*newUser); err != nil {
-		return dto.UserResDto{}, apperror.NewAppError(err)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 	}
 
 	return *created.ToDto(), nil
 }
 
+/**************************************
+	ユーザー削除
+**************************************/
 func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserResDto, error) {
 	var err error
 
@@ -114,6 +126,9 @@ func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserResDto, error) {
 	return *deleted.ToDto(), nil
 }
 
+/**************************************
+	ユーザー更新
+**************************************/
 func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
@@ -134,17 +149,18 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserRe
 	// ユーザー名 && パスワード 両方変更する場合
 	if len(user.Name) != 0 && len(user.Password) != 0 {
 		if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(user.Password).Build(); err != nil {
-			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 		}
 		// ユーザー名のみ変更する場合
 	} else if len(user.Name) != 0 {
-		if newUser, err = domain.NewUserBuilder().Name(user.Name).Password(oldParams.GetPassword()).Build(); err != nil {
-			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+		if err = oldParams.SetName(user.Name); err != nil {
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 		}
+		newUser = &oldParams
 		// パスワードのみ変更する場合
 	} else {
 		if newUser, err = domain.NewUserBuilder().Name(oldParams.GetName()).Password(user.Password).Build(); err != nil {
-			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+			return dto.UserResDto{}, apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)
 		}
 	}
 
@@ -157,6 +173,9 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserRe
 	return *updated.ToDto(), nil
 }
 
+/**************************************
+	private
+**************************************/
 func makeUserPage(page int, limit int, target []domain.User) (appmodel.Page, error) {
 	var err error
 

@@ -68,6 +68,8 @@ func ValidateName(name string) error {
 }
 
 func ValidatePassword(password string) error {
+	const PasswordAllowedStr = apputil.UpCaseAlphabet + apputil.DownCaseAlphabet + apputil.Number
+
 	// 空文字はNG
 	if password == "" {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`"password"が空文字になっています, password: %v`, password), http.StatusBadRequest)
@@ -79,17 +81,23 @@ func ValidatePassword(password string) error {
 	}
 
 	// 英数大文字小文字を含む最小8文字
-	if err := validate.Var(password, "containsany=abcdefghijklmnopqrstuvwsyz"); err != nil {
+	if err := validate.Var(password, fmt.Sprintf("containsany=%v", apputil.DownCaseAlphabet)); err != nil {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordに小文字のアルファベットを入れてください, password: %v`, password), http.StatusBadRequest)
 	}
-	if err := validate.Var(password, "containsany=ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+	if err := validate.Var(password, fmt.Sprintf("containsany=%v", apputil.UpCaseAlphabet)); err != nil {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordに大文字のアルファベットを入れてください, password: %v`, password), http.StatusBadRequest)
 	}
-	if err := validate.Var(password, "containsany=0123456789"); err != nil {
+	if err := validate.Var(password, fmt.Sprintf("containsany=%v", apputil.Number)); err != nil {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordに数字を入れてください, password: %v`, password), http.StatusBadRequest)
 	}
 	if err := validate.Var(password, "min=8"); err != nil {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordは8文字以上にしてください, password: %v`, password), http.StatusBadRequest)
 	}
+
+	// 英数大文字小文字以外の文字を含む場合はNG
+	if !apputil.ContainsAllowedStrOnly(password, PasswordAllowedStr) {
+		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordには英数大文字小文字以外を含めることはできません, password: %v`, password), http.StatusBadRequest)
+	}
+
 	return nil
 }

@@ -9,6 +9,12 @@ import (
 	"unicode/utf8"
 )
 
+const (
+	Number           = "0123456789"
+	UpCaseAlphabet   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	DownCaseAlphabet = "abcdefghijklmnopqrstuvwsyz"
+)
+
 func RemoveSpace(str string) string {
 	return strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
@@ -53,4 +59,19 @@ func GenerateHash(str string) (string, error) {
 		return "", err
 	}
 	return string(hashed), nil
+}
+
+/*
+	許容文字のみを含んでいるかを判定する
+	許容文字以外の文字が含まれている場合、falseとなる
+
+	ex) ContainsAllowedStrOnly("あ", "Abc123")→ false
+*/
+func ContainsAllowedStrOnly(target string, allowed string) bool {
+	for _, e := range target {
+		if !strings.ContainsAny(string(e), allowed) {
+			return false
+		}
+	}
+	return true
 }
