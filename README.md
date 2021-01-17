@@ -22,6 +22,13 @@
 * その他
     * アーキテクチャはDDD(風)
     * 基本的なエラー機構, テストコード
+* WIP
+    * ログイン・ログアウト
+    * TODO
+        * ユーザー周りのテストコードのパスワード関連
+        * ログインのテスト
+        * ログアウト機能
+        * ユーザー更新、ユーザー削除を未ログイン時にUnauthorizedにする
 
 ## ■Setup
 
@@ -41,6 +48,20 @@
 ## ■Routing
 
 * [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
+* POST `http://localhost:1323/login`
+    * ログイン
+
+```
+curl -i -X POST \
+   -H "Content-Type:application/json" \
+   -d \
+'{
+  "id": 1,
+  "password": "Test1111"
+}' \
+ 'http://localhost:1323/login'
+```
+
 * POST `http://localhost:1323/users/new`
     * ユーザー登録
 
@@ -48,7 +69,10 @@
 curl -i -X POST \
    -H "Content-Type:application/json" \
    -d \
-'{"name":"ハルキゲニア"}' \
+'{
+  "name": "ハルキゲニア",
+  "password": "Test1111"
+}' \
  'http://localhost:1323/users/new'
 ```
 
@@ -61,12 +85,16 @@ curl -i -X POST \
 
 * PUT `http://localhost:1323/users/:id/update`
     * ユーザー更新
+    * パターン: ユーザー名のみ, パスワードのみ, 両方
     
 ```
 curl -i -X PUT \
    -H "Content-Type:application/json" \
    -d \
-'{"name":"オパビニア"}' \
+'{
+  "name": "ハルキゲニア",
+  "password": "Test1111"
+}' \
  'http://localhost:1323/users/1/update'
 ```
 
