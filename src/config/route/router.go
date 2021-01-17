@@ -21,6 +21,8 @@ func NewRouter() *echo.Echo {
 	userRepository := infrastructure.NewUserRepositoryImpl()
 	userUseCase := impl.NewUserUseCaseImpl(userRepository)
 	userController := controller.NewUserController(userUseCase)
+	appUseCase := impl.NewApplicationUseCaseImpl(userRepository)
+	appController := controller.NewApplicationController(appUseCase)
 
 	// routing
 	e.GET("/users/:id", userController.GetUser)
@@ -28,6 +30,7 @@ func NewRouter() *echo.Echo {
 	e.POST("/users/new", userController.CreateUser)
 	e.DELETE("/users/:id", userController.DeleteUser)
 	e.PUT("/users/:id/update", userController.UpdateUser)
+	e.POST("/login", appController.Login)
 
 	return e
 }
