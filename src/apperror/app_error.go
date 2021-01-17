@@ -27,6 +27,7 @@ func (e *AppError) Error() string {
 	// 内側がappErrorである限り、ループする
 	var appErr *AppError
 	if errors.As(wrappedError, &appErr) {
+		fmt.Printf("Error: wrapping..., Location: %v:%v\n", e.fileName, e.line)
 		return appErr.Error()
 	}
 

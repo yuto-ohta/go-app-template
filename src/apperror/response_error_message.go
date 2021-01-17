@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go-app-template/src/apperror/message"
 	"net/http"
+	"runtime"
 
 	"github.com/labstack/echo/v4"
 )
@@ -38,6 +39,12 @@ func ResponseErrorJSON(c echo.Context, err error, errMessage message.Message) er
 	// ログにエラー内容を書き出し
 	fmt.Print("\n")
 	fmt.Println("-----------------------------------")
+	_, fileAbsPath, line, ok := runtime.Caller(1)
+	if !ok {
+		fileAbsPath = "???"
+		line = 0
+	}
+	fmt.Printf("Error has been responsed at..., Location: %v:%v\n", fileAbsPath, line)
 	fmt.Println(err.Error())
 	fmt.Print("\n")
 
