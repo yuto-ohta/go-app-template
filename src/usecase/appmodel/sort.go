@@ -15,6 +15,9 @@ func (o Order) String() string {
 	return messages[o]
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func GetOrder(param string) Order {
 	switch param {
 	case ASC.String():

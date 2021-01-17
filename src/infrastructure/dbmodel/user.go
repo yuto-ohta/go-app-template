@@ -12,6 +12,9 @@ type User struct {
 	Password string
 }
 
+/**************************************
+	Constructor
+**************************************/
 func NewUserModel(user domain.User) User {
 	return User{
 		ID:       user.GetId().GetValue(),
@@ -20,6 +23,9 @@ func NewUserModel(user domain.User) User {
 	}
 }
 
+/**************************************
+	Conversion
+**************************************/
 func (u User) ToDomain() (*domain.User, error) {
 	var err error
 

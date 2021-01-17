@@ -18,6 +18,9 @@ type UserId struct {
 	id int
 }
 
+/**************************************
+	Constructor
+**************************************/
 func NewUserId() *UserId {
 	return &UserId{id: _notAllocated}
 }
@@ -30,10 +33,16 @@ func NewUserIdWithId(id int) (*UserId, error) {
 	return userId, nil
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (u UserId) GetValue() int {
 	return u.id
 }
 
+/**************************************
+	Validation
+**************************************/
 func (u UserId) Validate() error {
 	if u.isAllocated() {
 		rules := "gte=1"

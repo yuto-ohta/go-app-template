@@ -12,6 +12,9 @@ type PageInfo struct {
 	offset      int
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (p PageInfo) GetLastPageNum() int {
 	return p.lastPageNum
 }
@@ -28,6 +31,9 @@ func (p PageInfo) GetOffset() int {
 	return p.offset
 }
 
+/**************************************
+	Constructor
+**************************************/
 func newPageInfo(pageNum int, limit int, maxCount int) (*PageInfo, error) {
 	if maxCount <= 0 {
 		return &PageInfo{}, apperror.NewAppError(errors.New("maxCountは1以上にしてください"))

@@ -7,6 +7,9 @@ import (
 
 type Pageable []interface{}
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (p Pageable) GetPage(pageNum int, limit int) (*Page, error) {
 	var err error
 
@@ -23,6 +26,9 @@ func (p Pageable) GetPage(pageNum int, limit int) (*Page, error) {
 	return page, nil
 }
 
+/**************************************
+	private
+**************************************/
 func (p Pageable) skip(offset int) (Pageable, error) {
 	if offset < 0 {
 		return Pageable{}, errors.New("offsetは0以上にしてください")

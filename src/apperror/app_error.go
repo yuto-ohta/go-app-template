@@ -21,6 +21,9 @@ type AppError struct {
 	line     int
 }
 
+/**************************************
+	ErrorImpl
+**************************************/
 func (e *AppError) Error() string {
 	wrappedError := e.err
 
@@ -57,6 +60,9 @@ func (e AppError) Unwrap() error {
 	return e.err
 }
 
+/**************************************
+	Constructor
+**************************************/
 func NewAppError(err error) *AppError {
 	fileName, line := getCallerData(2)
 	return &AppError{
@@ -77,6 +83,9 @@ func NewAppErrorWithStatus(err error, status HttpStatus) *AppError {
 	}
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (e AppError) GetHttpStatus() HttpStatus {
 	// httpStatusがない && 内側がappErrorである限り, ループする
 	var appErr *AppError
@@ -87,6 +96,9 @@ func (e AppError) GetHttpStatus() HttpStatus {
 	return e.status
 }
 
+/**************************************
+	private
+**************************************/
 func (s HttpStatus) isEvaluated() bool {
 	return s != _notEvaluated
 }

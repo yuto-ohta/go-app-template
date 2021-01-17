@@ -1,14 +1,15 @@
 package appmodel
 
-import (
-	"go-app-template/src/apperror"
-)
+import "go-app-template/src/apperror"
 
 type Page struct {
 	info PageInfo
 	list []interface{}
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (p Page) GetInfo() PageInfo {
 	return p.info
 }
@@ -17,6 +18,9 @@ func (p Page) GetList() []interface{} {
 	return p.list
 }
 
+/**************************************
+	Constructor
+**************************************/
 func newPage(info PageInfo, target Pageable) (*Page, error) {
 	var err error
 

@@ -18,6 +18,9 @@ func NewUserRepositoryImpl() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
+/**************************************
+	ユーザー取得
+**************************************/
 func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error) {
 	var err error
 
@@ -42,6 +45,9 @@ func (u UserRepositoryImpl) FindById(id valueobject.UserId) (domain.User, error)
 	return *user, nil
 }
 
+/**************************************
+	ユーザー全件取得
+**************************************/
 func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
 	var err error
 
@@ -65,6 +71,9 @@ func (u UserRepositoryImpl) FindAll() ([]domain.User, error) {
 	return userList, nil
 }
 
+/**************************************
+	ユーザー作成
+**************************************/
 func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	var err error
 
@@ -86,6 +95,9 @@ func (u UserRepositoryImpl) CreateUser(user domain.User) (domain.User, error) {
 	return *createdUser, nil
 }
 
+/**************************************
+	ユーザー削除
+**************************************/
 func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, error) {
 	var err error
 
@@ -104,6 +116,9 @@ func (u UserRepositoryImpl) DeleteUser(id valueobject.UserId) (domain.User, erro
 	return user, nil
 }
 
+/**************************************
+	ユーザー更新
+**************************************/
 func (u UserRepositoryImpl) UpdateUser(id valueobject.UserId, user domain.User) (domain.User, error) {
 	var err error
 

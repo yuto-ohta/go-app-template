@@ -52,6 +52,16 @@ func ResponseErrorJSON(c echo.Context, err error, errMessage message.Message) er
 	return c.JSON(int(httpStatus), newResponseErrorMessage(httpStatus, errMessage.String()))
 }
 
+func newResponseErrorMessage(status HttpStatus, message string) *ResponseErrorMessage {
+	return &ResponseErrorMessage{
+		status:  status,
+		message: message,
+	}
+}
+
+/**************************************
+	JSON
+**************************************/
 func (r ResponseErrorMessage) MarshalJSON() ([]byte, error) {
 	value, err := json.Marshal(&responseErrorMessageJSON{
 		Status:  int(r.status),
@@ -72,6 +82,9 @@ func (r *ResponseErrorMessage) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+/**************************************
+	Getter & Setter
+**************************************/
 func (r ResponseErrorMessage) GetStatus() HttpStatus {
 	return r.status
 }
@@ -80,9 +93,6 @@ func (r ResponseErrorMessage) GetMessage() string {
 	return r.message
 }
 
-func newResponseErrorMessage(status HttpStatus, message string) *ResponseErrorMessage {
-	return &ResponseErrorMessage{
-		status:  status,
-		message: message,
-	}
-}
+/**************************************
+	private
+**************************************/
