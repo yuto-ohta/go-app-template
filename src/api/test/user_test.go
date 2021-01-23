@@ -270,23 +270,39 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 func TestUserController_CreateUser_正常系(t *testing.T) {
 	// setup
 	const initializedLocalDataRecordCounts = 10
-	expectedUserIdInt := initializedLocalDataRecordCounts + 1
-	var params = []statusOKCheckParamUser{
-		// TODO: パスワードのチェック
+	firstExpectedUserIdInt := initializedLocalDataRecordCounts + 1
+	var paramsUserController = []statusOKCheckParamUser{
 		{base: statusOKCheckParamBase{
-			title:        "正常にユーザーが登録されること",
-			requestParam: requestParam{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"Test1111"}`)}},
-			expectedBody: dto.UserResDto{Id: expectedUserIdInt, Name: "新規ユーザー太郎"},
+			title:        "ユーザー登録①__正常にユーザーが登録されること",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"NewUser1"}`)}},
+			expectedBody: dto.UserResDto{Id: firstExpectedUserIdInt, Name: "新規ユーザー太郎"},
 		},
 		{base: statusOKCheckParamBase{
-			title:        "userIdに既存の値が指定されているときにも、正常にユーザーが登録されること（userIdが無視されること）",
-			requestParam: requestParam{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"id":1,"name":"新規ユーザー太郎", "password":"Test1111"}`)}},
-			expectedBody: dto.UserResDto{Id: expectedUserIdInt, Name: "新規ユーザー太郎"},
+			title:        "ユーザー登録②__userIdに既存の値が指定されているときにも、正常にユーザーが登録されること（userIdが無視されること）",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"id":1,"name":"二番煎次郎", "password":"NewUser2"}`)}},
+			expectedBody: dto.UserResDto{Id: firstExpectedUserIdInt + 1, Name: "二番煎次郎"},
+		},
+	}
+
+	var paramsAppController = []statusOKCheckParamBase{
+		{
+			title:        "ログイン確認①__正常にログインできること",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 11, "password":"NewUser1"}`)},
+		},
+		{
+			title:        "ログイン確認②__正常にログインできること",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 12, "password":"NewUser2"}`)},
 		},
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkExisting, true)
+	// 2ユーザーを登録する
+	doStatusOKCheck__UserController(t, paramsUserController, _checkExisting, false)
+	// 2ユーザーでログインする
+	doStatusOKCheck__ApplicationController(t, paramsAppController, false)
+
+	// clean
+	localdata.InitializeLocalData()
 }
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
@@ -393,32 +409,47 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 **************************************/
 func TestUserController_UpdateUser_正常系(t *testing.T) {
 	// setup
-	var params = []statusOKCheckParamUser{
+	var paramsUserController = []statusOKCheckParamUser{
 		{base: statusOKCheckParamBase{
 			title:        "正常にユーザー名が更新できること",
 			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)}},
 			expectedBody: dto.UserResDto{Id: 1, Name: "ハルキゲニア"},
 		},
-		// TODO: パスワードのチェック
 		{base: statusOKCheckParamBase{
 			title:        "正常にパスワードが更新できること",
 			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"HogeHoge123"}`)}},
-			expectedBody: dto.UserResDto{Id: 1, Name: "まるお"},
-		},
-		{base: statusOKCheckParamBase{
-			title:        "正常にユーザー名とパスワードが更新できること",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア", "password":"HogeHoge123"}`)}},
 			expectedBody: dto.UserResDto{Id: 1, Name: "ハルキゲニア"},
 		},
 		{base: statusOKCheckParamBase{
+			title:        "正常にユーザー名とパスワードが更新できること",
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/2/update", body: strings.NewReader(`{"name":"バオバブの木", "password":"BaoBab123"}`)}},
+			expectedBody: dto.UserResDto{Id: 2, Name: "バオバブの木"},
+		},
+		{base: statusOKCheckParamBase{
 			title:        "ボディのuserIdにパスと異なる値が指定されているときにも、正常にパスで指定したユーザーが更新されること（ボディのuserIdが無視されること）",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/2/update", body: strings.NewReader(`{"id":3,"name":"ビクトリア3世"}`)}},
-			expectedBody: dto.UserResDto{Id: 2, Name: "ビクトリア3世"},
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/3/update", body: strings.NewReader(`{"id":4,"name":"ビクトリア3世"}`)}},
+			expectedBody: dto.UserResDto{Id: 3, Name: "ビクトリア3世"},
+		},
+	}
+	var paramsAppController = []statusOKCheckParamBase{
+		{
+			title:        "ログイン確認①__パスワードを変更した後に、正常にログインできること",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 1, "password":"HogeHoge123"}`)},
+		},
+		{
+			title:        "ログイン確認②__パスワードを変更した後に、正常にログインできること",
+			requestParam: requestParam{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 2, "password":"BaoBab123"}`)},
 		},
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkExisting, true)
+	// 一通り更新系チェックをする
+	doStatusOKCheck__UserController(t, paramsUserController, _checkExisting, false)
+	// パスワードを変更したユーザーにて、ログイン確認する
+	doStatusOKCheck__ApplicationController(t, paramsAppController, false)
+
+	// clean
+	localdata.InitializeLocalData()
 }
 
 func TestUserController_UpdateUser_異常系(t *testing.T) {
