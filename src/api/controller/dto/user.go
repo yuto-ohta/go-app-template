@@ -27,7 +27,7 @@ type UserResDto struct {
 	Validation
 **************************************/
 func (u UserReceiveDto) Validate() error {
-	if err := ValidateId(u.Id); err != nil {
+	if err := validateUserReceiveUserId(u.Id); err != nil {
 		return apperror.NewAppError(err)
 	}
 	if err := ValidateName(u.Name); err != nil {
@@ -35,14 +35,6 @@ func (u UserReceiveDto) Validate() error {
 	}
 	if err := ValidatePassword(u.Password); err != nil {
 		return apperror.NewAppError(err)
-	}
-	return nil
-}
-
-func ValidateId(id int) error {
-	rules := "omitempty,gte=1"
-	if err := validate.Var(id, rules); err != nil {
-		return apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
 	}
 	return nil
 }
@@ -98,5 +90,16 @@ func ValidatePassword(password string) error {
 		return apperror.NewAppErrorWithStatus(fmt.Errorf(`passwordには英数大文字小文字以外を含めることはできません, password: %v`, password), http.StatusBadRequest)
 	}
 
+	return nil
+}
+
+/**************************************
+	private
+**************************************/
+func validateUserReceiveUserId(id int) error {
+	rules := "omitempty,gte=1"
+	if err := validate.Var(id, rules); err != nil {
+		return apperror.NewAppErrorWithStatus(err, http.StatusBadRequest)
+	}
 	return nil
 }
