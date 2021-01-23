@@ -28,7 +28,7 @@ func TestApplicaionController_Login_正常系(t *testing.T) {
 	}
 
 	// check
-	doStatusOKCheck__ApplicationController(t, params)
+	doStatusOKCheck__ApplicationController(t, params, false)
 }
 
 func TestApplicaionController_Login_異常系(t *testing.T) {
@@ -83,7 +83,7 @@ func TestApplicaionController_Login_異常系(t *testing.T) {
 /**************************************
 	private
 **************************************/
-func doStatusOKCheck__ApplicationController(t *testing.T, params []statusOKCheckParamBase) {
+func doStatusOKCheck__ApplicationController(t *testing.T, params []statusOKCheckParamBase, doCleanData bool) {
 	for _, p := range params {
 		// setup
 		req := httptest.NewRequest(p.requestParam.httpMethod, p.requestParam.path, p.requestParam.body)
@@ -109,7 +109,9 @@ func doStatusOKCheck__ApplicationController(t *testing.T, params []statusOKCheck
 		assert.Equal(t, expectedCode, actualCode)
 
 		// clean
-		localdata.InitializeLocalData()
+		if doCleanData {
+			localdata.InitializeLocalData()
+		}
 	}
 }
 

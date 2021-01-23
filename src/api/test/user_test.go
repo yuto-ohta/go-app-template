@@ -33,7 +33,7 @@ func TestUserController_GetUser_正常系(t *testing.T) {
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkExisting)
+	doStatusOKCheck__UserController(t, params, _checkExisting, false)
 }
 
 func TestUserController_GetUser_異常系(t *testing.T) {
@@ -286,7 +286,7 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkExisting)
+	doStatusOKCheck__UserController(t, params, _checkExisting, true)
 }
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
@@ -370,7 +370,7 @@ func TestUserController_DeleteUser_正常系(t *testing.T) {
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkNotExiting)
+	doStatusOKCheck__UserController(t, params, _checkNotExiting, true)
 }
 
 func TestUserController_DeleteUser_異常系(t *testing.T) {
@@ -418,7 +418,7 @@ func TestUserController_UpdateUser_正常系(t *testing.T) {
 	}
 
 	// check
-	doStatusOKCheck__UserController(t, params, _checkExisting)
+	doStatusOKCheck__UserController(t, params, _checkExisting, true)
 }
 
 func TestUserController_UpdateUser_異常系(t *testing.T) {
@@ -517,7 +517,7 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 /**************************************
 	private
 **************************************/
-func doStatusOKCheck__UserController(t *testing.T, params []statusOKCheckParamUser, recordCheckPattern recordCheckPattern) {
+func doStatusOKCheck__UserController(t *testing.T, params []statusOKCheckParamUser, recordCheckPattern recordCheckPattern, doCleanData bool) {
 	for _, p := range params {
 		// setup
 		req := httptest.NewRequest(p.base.requestParam.httpMethod, p.base.requestParam.path, p.base.requestParam.body)
@@ -553,7 +553,9 @@ func doStatusOKCheck__UserController(t *testing.T, params []statusOKCheckParamUs
 		}
 
 		// clean
-		localdata.InitializeLocalData()
+		if doCleanData {
+			localdata.InitializeLocalData()
+		}
 	}
 }
 
