@@ -12,6 +12,7 @@ type Page struct {
 /**************************************
 	Getter & Setter
 **************************************/
+
 func (p Page) GetInfo() PageInfo {
 	return p.info
 }
@@ -23,6 +24,7 @@ func (p Page) GetList() []interface{} {
 /**************************************
 	Constructor
 **************************************/
+
 func newPage(info PageInfo, target Pageable) (*Page, error) {
 	var err error
 

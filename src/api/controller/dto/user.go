@@ -26,6 +26,7 @@ type UserResDto struct {
 /**************************************
 	Validation
 **************************************/
+
 func (u UserReceiveDto) Validate() error {
 	if err := validateUserReceiveUserId(u.Id); err != nil {
 		return apperror.NewAppError(err)
@@ -96,6 +97,7 @@ func ValidatePassword(password string) error {
 /**************************************
 	private
 **************************************/
+
 func validateUserReceiveUserId(id int) error {
 	rules := "omitempty,gte=1"
 	if err := validate.Var(id, rules); err != nil {

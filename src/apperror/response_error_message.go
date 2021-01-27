@@ -62,6 +62,7 @@ func newResponseErrorMessage(status HttpStatus, message string) *ResponseErrorMe
 /**************************************
 	JSON
 **************************************/
+
 func (r ResponseErrorMessage) MarshalJSON() ([]byte, error) {
 	value, err := json.Marshal(&responseErrorMessageJSON{
 		Status:  int(r.status),
@@ -85,6 +86,7 @@ func (r *ResponseErrorMessage) UnmarshalJSON(b []byte) error {
 /**************************************
 	Getter & Setter
 **************************************/
+
 func (r ResponseErrorMessage) GetStatus() HttpStatus {
 	return r.status
 }

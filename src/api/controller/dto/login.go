@@ -19,6 +19,7 @@ type LoginResDto struct {
 /**************************************
 	Validation
 **************************************/
+
 func (l LoginReceiveDto) Validate() error {
 	if err := validateLoginUserId(l.Id); err != nil {
 		return apperror.NewAppError(err)
@@ -32,6 +33,7 @@ func (l LoginReceiveDto) Validate() error {
 /**************************************
 	private
 **************************************/
+
 func validateLoginUserId(id int) error {
 	rules := "gte=1"
 	if err := validate.Var(id, rules); err != nil {

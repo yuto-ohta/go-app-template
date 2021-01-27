@@ -23,6 +23,7 @@ func NewUserUseCaseImpl(userRepository repository.UserRepository) *UserUseCaseIm
 /**************************************
 	ユーザー取得
 **************************************/
+
 func (u UserUseCaseImpl) GetUser(id int) (dto.UserResDto, error) {
 	var err error
 
@@ -44,6 +45,7 @@ func (u UserUseCaseImpl) GetUser(id int) (dto.UserResDto, error) {
 /**************************************
 	ユーザー全件取得
 **************************************/
+
 func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.UserPage, error) {
 	var err error
 
@@ -88,6 +90,7 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 /**************************************
 	ユーザー登録
 **************************************/
+
 func (u UserUseCaseImpl) CreateUser(userDto dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
@@ -109,6 +112,7 @@ func (u UserUseCaseImpl) CreateUser(userDto dto.UserReceiveDto) (dto.UserResDto,
 /**************************************
 	ユーザー削除
 **************************************/
+
 func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserResDto, error) {
 	var err error
 
@@ -130,6 +134,7 @@ func (u UserUseCaseImpl) DeleteUser(id int) (dto.UserResDto, error) {
 /**************************************
 	ユーザー更新
 **************************************/
+
 func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserResDto, error) {
 	var err error
 
@@ -177,6 +182,7 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserRe
 /**************************************
 	private
 **************************************/
+
 func makeUserPage(page int, limit int, target []domain.User) (pagination.Page, error) {
 	var err error
 

@@ -16,6 +16,7 @@ type SearchCondition struct {
 /**************************************
 	Constructor
 **************************************/
+
 func NewSearchCondition(orderBy string, order Order, page int, limit int) (*SearchCondition, error) {
 	condition := &SearchCondition{
 		orderBy: orderBy,
@@ -38,6 +39,7 @@ func NewSearchCondition(orderBy string, order Order, page int, limit int) (*Sear
 /**************************************
 	Getter & Setter
 **************************************/
+
 func (s SearchCondition) GetOrderBy() string {
 	return s.orderBy
 }
@@ -57,6 +59,7 @@ func (s SearchCondition) GetLimit() int {
 /**************************************
 	Validation
 **************************************/
+
 func validate(condition SearchCondition) error {
 	// limitがない && pageが指定されているとき
 	if condition.page > 0 && condition.limit <= 0 {

@@ -18,6 +18,7 @@ func (o Order) String() string {
 /**************************************
 	Getter & Setter
 **************************************/
+
 func GetOrder(param string) Order {
 	switch param {
 	case ASC.String():

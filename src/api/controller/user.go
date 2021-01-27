@@ -27,6 +27,7 @@ func NewUserController(useCase usecase.UserUseCase) *UserController {
 	@path_param id: userId
 	@return user
 **************************************/
+
 func (u UserController) GetUser(c echo.Context) error {
 	var err error
 
@@ -54,6 +55,7 @@ func (u UserController) GetUser(c echo.Context) error {
 	@query_param orderBy, order, page, limit
 	@return users
 **************************************/
+
 func (u UserController) GetAllUser(c echo.Context) error {
 	var err error
 
@@ -101,6 +103,7 @@ func (u UserController) GetAllUser(c echo.Context) error {
 	@body_param name: userName, password: password
 	@return user
 **************************************/
+
 func (u UserController) CreateUser(c echo.Context) error {
 	var err error
 
@@ -128,6 +131,7 @@ func (u UserController) CreateUser(c echo.Context) error {
 	@path_param id: userId
 	@return user
 **************************************/
+
 func (u UserController) DeleteUser(c echo.Context) error {
 	var err error
 
@@ -156,6 +160,7 @@ func (u UserController) DeleteUser(c echo.Context) error {
 	@body_param name: userName, password: password
 	@return user
 **************************************/
+
 func (u UserController) UpdateUser(c echo.Context) error {
 	var err error
 
@@ -187,6 +192,7 @@ func (u UserController) UpdateUser(c echo.Context) error {
 /**************************************
 	private
 **************************************/
+
 func getUserIdParam(param string) (int, error) {
 	id, err := strconv.Atoi(param)
 
