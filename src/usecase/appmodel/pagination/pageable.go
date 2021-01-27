@@ -1,4 +1,4 @@
-package appmodel
+package pagination
 
 import (
 	"errors"

@@ -1,6 +1,8 @@
-package appmodel
+package pagination
 
-import "go-app-template/src/apperror"
+import (
+	"go-app-template/src/apperror"
+)
 
 type Page struct {
 	info PageInfo

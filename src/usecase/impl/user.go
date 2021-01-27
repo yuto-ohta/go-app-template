@@ -8,6 +8,7 @@ import (
 	"go-app-template/src/domain/repository"
 	"go-app-template/src/domain/valueobject"
 	"go-app-template/src/usecase/appmodel"
+	"go-app-template/src/usecase/appmodel/pagination"
 	"net/http"
 )
 
@@ -58,7 +59,7 @@ func (u UserUseCaseImpl) GetAllUser(condition appmodel.SearchCondition) (dto.Use
 	}
 
 	// make userPage
-	var userPage appmodel.Page
+	var userPage pagination.Page
 	if userPage, err = makeUserPage(condition.GetPage(), condition.GetLimit(), allUser); err != nil {
 		return dto.UserPage{}, apperror.NewAppError(err)
 	}
@@ -176,25 +177,25 @@ func (u UserUseCaseImpl) UpdateUser(id int, user dto.UserReceiveDto) (dto.UserRe
 /**************************************
 	private
 **************************************/
-func makeUserPage(page int, limit int, target []domain.User) (appmodel.Page, error) {
+func makeUserPage(page int, limit int, target []domain.User) (pagination.Page, error) {
 	var err error
 
 	// convert to Pageable
-	pageable := make(appmodel.Pageable, len(target))
+	pageable := make(pagination.Pageable, len(target))
 	for i, u := range target {
 		pageable[i] = u
 	}
 
 	// paging
-	var userPage *appmodel.Page
+	var userPage *pagination.Page
 	if userPage, err = pageable.GetPage(page, limit); err != nil {
-		return appmodel.Page{}, apperror.NewAppError(err)
+		return pagination.Page{}, apperror.NewAppError(err)
 	}
 
 	return *userPage, nil
 }
 
-func makeUserDtoListFromPage(userPage appmodel.Page) ([]dto.UserResDto, error) {
+func makeUserDtoListFromPage(userPage pagination.Page) ([]dto.UserResDto, error) {
 	dtoList := make([]dto.UserResDto, len(userPage.GetList()))
 	for i, e := range userPage.GetList() {
 		userDomain, ok := e.(domain.User)
