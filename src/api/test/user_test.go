@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/config/db/localdata"
@@ -11,6 +10,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,6 +24,7 @@ type statusOKCheckParamUser struct {
 /**************************************
 	ユーザー取得
 **************************************/
+
 func TestUserController_GetUser_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParamUser{
@@ -69,6 +71,7 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 /**************************************
 	ユーザー全件取得
 **************************************/
+
 func TestUserController_GetAllUser_正常系(t *testing.T) {
 	// setup
 	params := []struct {
@@ -267,6 +270,7 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 /**************************************
 	ユーザー登録
 **************************************/
+
 func TestUserController_CreateUser_正常系(t *testing.T) {
 	// setup
 	const initializedLocalDataRecordCounts = 10
@@ -376,6 +380,7 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 /**************************************
 	ユーザー削除
 **************************************/
+
 func TestUserController_DeleteUser_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParamUser{
@@ -407,6 +412,7 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 /**************************************
 	ユーザー更新
 **************************************/
+
 func TestUserController_UpdateUser_正常系(t *testing.T) {
 	// setup
 	var paramsUserController = []statusOKCheckParamUser{
@@ -548,6 +554,7 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 /**************************************
 	private
 **************************************/
+
 func doStatusOKCheck__UserController(t *testing.T, params []statusOKCheckParamUser, recordCheckPattern recordCheckPattern, doCleanData bool) {
 	for _, p := range params {
 		// setup

@@ -3,7 +3,6 @@ package test
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/config/db/localdata"
@@ -16,6 +15,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -76,6 +77,7 @@ func TestMain(m *testing.M) {
 /**************************************
 	private
 **************************************/
+
 func doRecordNotExistingCheck(t *testing.T, recordId int) {
 	// actual
 	_, actualErr := _userUseCase.GetUser(recordId)

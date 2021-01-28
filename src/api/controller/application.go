@@ -6,6 +6,8 @@ import (
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/usecase"
+	"go-app-template/src/usecase/appmodel"
+	"go-app-template/src/usecase/appmodel/session"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,8 +24,9 @@ func NewApplicationController(useCase usecase.ApplicationUseCase) *ApplicationCo
 /**************************************
 	ログイン
 	@body_param id: userId, password: password
-	@return token
+	@return NoContent
 **************************************/
+
 func (a ApplicationController) Login(c echo.Context) error {
 	var err error
 
@@ -38,7 +41,7 @@ func (a ApplicationController) Login(c echo.Context) error {
 	}
 
 	// try login
-	var token dto.LoginResDto
+	var token appmodel.AuthToken
 	if token, err = a.applicationUseCase.Login(loginDto); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {
@@ -50,5 +53,28 @@ func (a ApplicationController) Login(c echo.Context) error {
 		return apperror.ResponseErrorJSON(c, err, message.LoginFailed)
 	}
 
-	return c.JSON(http.StatusOK, token)
+	// set token into session
+	manager := session.NewSessionManager()
+	if err = manager.Set(c, "token", string(token)); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.LoginFailed)
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+/**************************************
+	ログアウト
+	@return NoContent
+**************************************/
+
+func (a ApplicationController) Logout(c echo.Context) error {
+	var err error
+
+	// invalidate session
+	manager := session.NewSessionManager()
+	if err = manager.Invalidate(c); err != nil {
+		return apperror.ResponseErrorJSON(c, err, message.LogoutFailed)
+	}
+
+	return c.NoContent(http.StatusOK)
 }

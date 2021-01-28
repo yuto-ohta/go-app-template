@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/config/db/localdata"
@@ -12,12 +11,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/stretchr/testify/assert"
 )
 
 /**************************************
 	ログイン
 **************************************/
+
 func TestApplicaionController_Login_正常系(t *testing.T) {
 	// setup
 	var params = []statusOKCheckParamBase{
@@ -83,6 +85,7 @@ func TestApplicaionController_Login_異常系(t *testing.T) {
 /**************************************
 	private
 **************************************/
+
 func doStatusOKCheck__ApplicationController(t *testing.T, params []statusOKCheckParamBase, doCleanData bool) {
 	for _, p := range params {
 		// setup

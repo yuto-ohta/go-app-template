@@ -1,4 +1,7 @@
 project_name: go-app-template
+session_key: go-app-template-session
+signature_key: osakehanomimasen
+cookie_encrypt_key: tabakomosuimasen
 development:
   db_name: development
   user: root
