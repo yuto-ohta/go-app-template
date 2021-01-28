@@ -1,12 +1,13 @@
 package apputil
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"net/url"
 	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
