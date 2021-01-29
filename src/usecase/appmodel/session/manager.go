@@ -19,13 +19,13 @@ func NewSessionManager() Manager {
 	return Manager{}
 }
 
-func (s Manager) Get(c echo.Context) *sessions.Session {
+func (s Manager) GetSession(c echo.Context) *sessions.Session {
 	sess, _ := session.Get(_sessionKey, c)
 	return sess
 }
 
-func (s Manager) Set(c echo.Context, key string, value string) error {
-	sess := s.Get(c)
+func (s Manager) SetSession(c echo.Context, key string, value string) error {
+	sess := s.GetSession(c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400,
@@ -38,8 +38,8 @@ func (s Manager) Set(c echo.Context, key string, value string) error {
 	return nil
 }
 
-func (s Manager) Invalidate(c echo.Context) error {
-	sess := s.Get(c)
+func (s Manager) InvalidateSession(c echo.Context) error {
+	sess := s.GetSession(c)
 	sess.Options.MaxAge = -1
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return apperror.NewAppErrorWithStatus(err, http.StatusInternalServerError)

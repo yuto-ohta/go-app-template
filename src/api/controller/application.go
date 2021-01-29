@@ -55,7 +55,7 @@ func (a ApplicationController) Login(c echo.Context) error {
 
 	// set token into session
 	manager := session.NewSessionManager()
-	if err = manager.Set(c, "token", string(token)); err != nil {
+	if err = manager.SetSession(c, "token", string(token)); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.LoginFailed)
 	}
 
@@ -72,7 +72,7 @@ func (a ApplicationController) Logout(c echo.Context) error {
 
 	// invalidate session
 	manager := session.NewSessionManager()
-	if err = manager.Invalidate(c); err != nil {
+	if err = manager.InvalidateSession(c); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.LogoutFailed)
 	}
 
