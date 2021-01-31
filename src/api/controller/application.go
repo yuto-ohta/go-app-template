@@ -41,7 +41,7 @@ func (a ApplicationController) Login(c echo.Context) error {
 	}
 
 	// try login
-	var token appmodel.AuthToken
+	var token appmodel.SignedToken
 	if token, err = a.applicationUseCase.Login(loginDto); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusNotFound {

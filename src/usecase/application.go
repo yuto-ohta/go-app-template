@@ -6,5 +6,5 @@ import (
 )
 
 type ApplicationUseCase interface {
-	Login(loginDto dto.LoginReceiveDto) (appmodel.AuthToken, error)
+	Login(loginDto dto.LoginReceiveDto) (appmodel.SignedToken, error)
 }

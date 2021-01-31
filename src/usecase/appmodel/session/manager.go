@@ -15,9 +15,17 @@ var _sessionKey = config.GetConfig()["session_key"].(string)
 type Manager struct {
 }
 
-func NewSessionManager() Manager {
-	return Manager{}
+/**************************************
+	Constructor
+**************************************/
+
+func NewSessionManager() *Manager {
+	return &Manager{}
 }
+
+/**************************************
+	Main
+**************************************/
 
 func (s Manager) GetSession(c echo.Context) *sessions.Session {
 	sess, _ := session.Get(_sessionKey, c)

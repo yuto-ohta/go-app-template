@@ -6,22 +6,24 @@ import (
 	"go-app-template/src/api/controller/dto"
 	"go-app-template/src/apperror"
 	"go-app-template/src/apperror/message"
-	"go-app-template/src/config"
 	"go-app-template/src/usecase"
 	"go-app-template/src/usecase/appmodel"
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {
 	userUseCase usecase.UserUseCase
+	authUseCase usecase.AuthenticationUseCase
 }
 
-func NewUserController(useCase usecase.UserUseCase) *UserController {
-	return &UserController{userUseCase: useCase}
+func NewUserController(useCase usecase.UserUseCase, authUseCase usecase.AuthenticationUseCase) *UserController {
+	return &UserController{
+		userUseCase: useCase,
+		authUseCase: authUseCase,
+	}
 }
 
 /**************************************
@@ -97,11 +99,6 @@ func (u UserController) GetAllUser(c echo.Context) error {
 		return apperror.ResponseErrorJSON(c, err, message.GetUserFailed)
 	}
 
-	sess, _ := session.Get(config.GetConfig()["project_name"].(string), c)
-	hoge := sess.Values
-	fmt.Println("-----------------------------------")
-	fmt.Println(hoge)
-
 	return c.JSON(http.StatusOK, userPage)
 }
 
@@ -148,6 +145,15 @@ func (u UserController) DeleteUser(c echo.Context) error {
 		return apperror.ResponseErrorJSON(c, err, message.InvalidUserId)
 	}
 
+	// authenticate
+	if _, err = u.authUseCase.Authenticate(c, id); err != nil {
+		var appErr *apperror.AppError
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusUnauthorized {
+			return apperror.ResponseErrorJSON(c, err, message.UnAuthorized)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.DeleteUserFailed)
+	}
+
 	// delete user
 	var user dto.UserResDto
 	if user, err = u.userUseCase.DeleteUser(id); err != nil {
@@ -181,6 +187,15 @@ func (u UserController) UpdateUser(c echo.Context) error {
 	var newUser dto.UserReceiveDto
 	if newUser, err = getUpdateUserBodyParam(c); err != nil {
 		return apperror.ResponseErrorJSON(c, err, message.StatusBadRequest)
+	}
+
+	// authenticate
+	if _, err = u.authUseCase.Authenticate(c, id); err != nil {
+		var appErr *apperror.AppError
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusUnauthorized {
+			return apperror.ResponseErrorJSON(c, err, message.UnAuthorized)
+		}
+		return apperror.ResponseErrorJSON(c, err, message.UpdateUserFailed)
 	}
 
 	// update user

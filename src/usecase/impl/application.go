@@ -25,7 +25,7 @@ func NewApplicationUseCaseImpl(userRepository repository.UserRepository) *Applic
 	ログイン
 **************************************/
 
-func (a ApplicationUseCaseImpl) Login(loginDto dto.LoginReceiveDto) (appmodel.AuthToken, error) {
+func (a ApplicationUseCaseImpl) Login(loginDto dto.LoginReceiveDto) (appmodel.SignedToken, error) {
 	var err error
 
 	// get userId from loginDto
@@ -47,8 +47,8 @@ func (a ApplicationUseCaseImpl) Login(loginDto dto.LoginReceiveDto) (appmodel.Au
 	}
 
 	// generate token
-	var token appmodel.AuthToken
-	if token, err = appmodel.GenerateAuthToken(user.GetId().GetValue(), user.GetName()); err != nil {
+	var token appmodel.SignedToken
+	if token, err = appmodel.GenerateSignedToken(user.GetId().GetValue()); err != nil {
 		return "", apperror.NewAppError(err)
 	}
 

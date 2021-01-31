@@ -4,6 +4,7 @@ import (
 	"go-app-template/src/api/controller"
 	"go-app-template/src/config"
 	"go-app-template/src/infrastructure"
+	sess "go-app-template/src/usecase/appmodel/session"
 	"go-app-template/src/usecase/impl"
 
 	"github.com/gorilla/sessions"
@@ -24,13 +25,15 @@ func NewRouter() *echo.Echo {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(_cookieEncryptKey))))
 
 	// make instance
-	// -------- user
+	// -------- repository
 	userRepository := infrastructure.NewUserRepositoryImpl()
-	userUseCase := impl.NewUserUseCaseImpl(userRepository)
-	userController := controller.NewUserController(userUseCase)
-	// -------- app
+	// -------- useCase
 	appUseCase := impl.NewApplicationUseCaseImpl(userRepository)
+	userUseCase := impl.NewUserUseCaseImpl(userRepository)
+	authUseCase := impl.NewAuthenticationUseCaseImpl(*sess.NewSessionManager(), userUseCase)
+	// -------- controller
 	appController := controller.NewApplicationController(appUseCase)
+	userController := controller.NewUserController(userUseCase, authUseCase)
 
 	// routing
 	// -------- accessible without Login
