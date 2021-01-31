@@ -9,6 +9,7 @@ const (
 	LoginFailed
 	LogoutFailed
 	UnAuthorized
+	Forbidden
 )
 
 func (s Application) String() string {
@@ -18,7 +19,8 @@ func (s Application) String() string {
 		WrongPassword:    "パスワードが間違っています",
 		LoginFailed:      "ログインに失敗しました",
 		LogoutFailed:     "ログアウトに失敗しました",
-		UnAuthorized:     "この操作は許可されていません",
+		UnAuthorized:     "認証に失敗しました",
+		Forbidden:        "この操作は許可されていません",
 	}
 	return messages[s]
 }

@@ -32,6 +32,10 @@ const (
 	_checkNotExiting
 )
 
+const (
+	_testUserLoginPassword = "Test1111"
+)
+
 type recordCheckPattern int
 
 type requestParam struct {
@@ -42,6 +46,7 @@ type requestParam struct {
 
 /*
 	※各テストファイルにて、expectedBodyを加える
+      loginする場合のuserIdはexpectedBodyから取得する
 	ex)
 		type statusOKCheckParamUser struct {
 			base         statusOKCheckParamBase
@@ -51,6 +56,7 @@ type requestParam struct {
 type statusOKCheckParamBase struct {
 	title        string
 	requestParam requestParam
+	doLogin      bool
 }
 
 type errorCheckParam struct {
@@ -58,6 +64,8 @@ type errorCheckParam struct {
 	requestParams   []requestParam
 	expectedCode    int
 	expectedMessage message.Message
+	doLogin         bool
+	loginUserId     int
 }
 
 func TestMain(m *testing.M) {
@@ -105,6 +113,10 @@ func doErrorCheck(t *testing.T, params []errorCheckParam) {
 			if ip.httpMethod == http.MethodPost || ip.httpMethod == http.MethodPut {
 				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			}
+			if p.doLogin {
+				recForLogin := httptest.NewRecorder()
+				login(recForLogin, req, p.loginUserId)
+			}
 			rec := httptest.NewRecorder()
 			_target.ServeHTTP(rec, req)
 
@@ -127,6 +139,25 @@ func doErrorCheck(t *testing.T, params []errorCheckParam) {
 			localdata.InitializeLocalData()
 		}
 	}
+}
+
+func login(rec *httptest.ResponseRecorder, req *http.Request, userId int) {
+	var cookie *http.Cookie
+	reqForLogin := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(fmt.Sprintf(`{"id": %v, "password":"%v"}`, userId, _testUserLoginPassword)))
+	reqForLogin.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	_target.ServeHTTP(rec, reqForLogin)
+	recHeaderCookie := rec.Header().Get("Set-Cookie")
+	cookieValue := strings.Split(recHeaderCookie, ";")[0][len("go-app-template-session="):]
+	cookie = &http.Cookie{
+		Name:  "go-app-template-session",
+		Value: cookieValue,
+	}
+	req.AddCookie(cookie)
+}
+
+func logout(rec *httptest.ResponseRecorder) {
+	logoutReq := httptest.NewRequest(http.MethodGet, "/logout", nil)
+	_target.ServeHTTP(rec, logoutReq)
 }
 
 func makeInputs(method string, path string, body []io.Reader) []requestParam {

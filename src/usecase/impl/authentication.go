@@ -54,7 +54,7 @@ func (a AuthenticationUseCaseImpl) Authenticate(c echo.Context, targetUserIdInt 
 
 	// check sessionUser and target are the same
 	if sessionUser.Id != targetUserIdInt {
-		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(fmt.Errorf("sessionUser is not the target user, sessionUser: %v, targetUserId: %v", sessionUser, targetUserIdInt), http.StatusUnauthorized)
+		return dto.UserResDto{}, apperror.NewAppErrorWithStatus(fmt.Errorf("sessionUser is not the target user, sessionUser: %v, targetUserId: %v", sessionUser, targetUserIdInt), http.StatusForbidden)
 	}
 
 	return sessionUser, nil

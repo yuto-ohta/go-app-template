@@ -120,7 +120,9 @@ func (a SignedToken) getStrValue() string {
 }
 
 func validateAndDecrypt(signedToken SignedToken) (*jwt.Token, error) {
-	// validation内容 tokenが正常であること、およびexpireが現在時間を過ぎていないことをチェックする
+	// validation内容
+	// ----①tokenが正常であること
+	// ----②expireが現在時間を過ぎていないこと
 	token, err := jwt.Parse(signedToken.getStrValue(), func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return "", fmt.Errorf("unexpected signing method: %v", token.Method)

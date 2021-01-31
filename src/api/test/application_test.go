@@ -39,47 +39,64 @@ func TestApplicaionController_Login_異常系(t *testing.T) {
 
 	var params = []errorCheckParam{
 		{
-			"パスワードが間違っているとき、401になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 1, "password":"hogehoge"}`)}},
-			http.StatusUnauthorized,
-			message.WrongPassword,
+			title:           "パスワードが間違っているとき、401になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 1, "password":"hogehoge"}`)}},
+			expectedCode:    http.StatusUnauthorized,
+			expectedMessage: message.WrongPassword,
 		},
 		{
-			"存在しないuserIdのとき、404になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 9999, "password":"Test1111"}`)}},
-			http.StatusNotFound,
-			message.UserNotFound,
+			title:           "存在しないuserIdのとき、404になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 9999, "password":"Test1111"}`)}},
+			expectedCode:    http.StatusNotFound,
+			expectedMessage: message.UserNotFound,
 		},
 		{
-			"userIdが数字ではないとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": hoge, "password":"Test1111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userIdが数字ではないとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": hoge, "password":"Test1111"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"userIdが0以下のとき、400になること",
-			[]requestParam{
+			title: "userIdが0以下のとき、400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 0, "password":"Test1111"}`)},
 				{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": -1, "password":"Test1111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordが空文字のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 1, "password":""}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが空文字のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/login", body: strings.NewReader(`{"id": 1, "password":""}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPost, "/login", makeBodyList(makeLoginReceiveDtoJsonList(passwords))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordに半角・全角スペース、改行が含まれているとき、400になること",
+			requestParams:   makeInputs(http.MethodPost, "/login", makeBodyList(makeLoginReceiveDtoJsonList(passwords))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 	}
 
 	// check
 	doErrorCheck(t, params)
+}
+
+/**************************************
+	ログアウト
+**************************************/
+
+func TestApplicaionController_Logout_正常系(t *testing.T) {
+	// setup
+	var params = []statusOKCheckParamBase{
+		{
+			title:        "正常にログアウトできること",
+			requestParam: requestParam{httpMethod: http.MethodGet, path: "/logout", body: nil},
+		},
+	}
+
+	// check
+	doStatusOKCheck__ApplicationController(t, params, false)
 }
 
 /**************************************
@@ -98,16 +115,12 @@ func doStatusOKCheck__ApplicationController(t *testing.T, params []statusOKCheck
 
 		// actual
 		actualCode := rec.Code
-		var actualBody dto.LoginResDto
-		if err := json.Unmarshal(rec.Body.Bytes(), &actualBody); err != nil {
-			t.Errorf("responseにTokenが返ってきていません\nresponse: %v", rec.Body.String())
-		}
 
 		// expected
 		const expectedCode = http.StatusOK
 
 		// check
-		// LoginResDtoに変換でき && ステータスコードが200であればOKとする
+		// ステータスコードが200であればOKとする
 		fmt.Println(p.title)
 		assert.Equal(t, expectedCode, actualCode)
 

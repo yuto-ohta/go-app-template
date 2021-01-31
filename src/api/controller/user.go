@@ -151,6 +151,9 @@ func (u UserController) DeleteUser(c echo.Context) error {
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusUnauthorized {
 			return apperror.ResponseErrorJSON(c, err, message.UnAuthorized)
 		}
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusForbidden {
+			return apperror.ResponseErrorJSON(c, err, message.Forbidden)
+		}
 		return apperror.ResponseErrorJSON(c, err, message.DeleteUserFailed)
 	}
 
@@ -194,6 +197,9 @@ func (u UserController) UpdateUser(c echo.Context) error {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusUnauthorized {
 			return apperror.ResponseErrorJSON(c, err, message.UnAuthorized)
+		}
+		if errors.As(err, &appErr) && appErr.GetHttpStatus() == http.StatusForbidden {
+			return apperror.ResponseErrorJSON(c, err, message.Forbidden)
 		}
 		return apperror.ResponseErrorJSON(c, err, message.UpdateUserFailed)
 	}

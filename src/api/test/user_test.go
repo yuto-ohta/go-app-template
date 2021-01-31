@@ -42,25 +42,25 @@ func TestUserController_GetUser_異常系(t *testing.T) {
 	// setup
 	var params = []errorCheckParam{
 		{
-			"存在しないuserIdのとき、404になること",
-			[]requestParam{{httpMethod: http.MethodGet, path: "/users/9999", body: nil}},
-			http.StatusNotFound,
-			message.UserNotFound,
+			title:           "存在しないuserIdのとき、404になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodGet, path: "/users/9999", body: nil}},
+			expectedCode:    http.StatusNotFound,
+			expectedMessage: message.UserNotFound,
 		},
 		{
-			"userIdが数字ではないとき、400になること",
-			[]requestParam{{httpMethod: http.MethodGet, path: "/users/hogehoge", body: nil}},
-			http.StatusBadRequest,
-			message.InvalidUserId,
+			title:           "userIdが数字ではないとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodGet, path: "/users/hogehoge", body: nil}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.InvalidUserId,
 		},
 		{
-			"userIdが0以下のとき、400になること",
-			[]requestParam{
+			title: "userIdが0以下のとき、400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users/0", body: nil},
 				{httpMethod: http.MethodGet, path: "/users/-1", body: nil},
 			},
-			http.StatusBadRequest,
-			message.InvalidUserId,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.InvalidUserId,
 		},
 	}
 
@@ -218,48 +218,48 @@ func TestUserController_GetAllUser_異常系(t *testing.T) {
 	// setup
 	var params = []errorCheckParam{
 		{
-			"pageのみ指定され、limitがないとき、400になること",
-			[]requestParam{
+			title: "pageのみ指定され、limitがないとき、400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users?page=5", body: nil},
 			},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"page, limitが数字ではないとき、400になること",
-			[]requestParam{
+			title: "page, limitが数字ではないとき、400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users?limit=hoge", body: nil},
 				{httpMethod: http.MethodGet, path: "/users?page=hoge&limit=5", body: nil},
 			},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"page, limitが0以下のとき、400になること",
-			[]requestParam{
+			title: "page, limitが0以下のとき、400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users?limit=0", body: nil},
 				{httpMethod: http.MethodGet, path: "/users?limit=-1", body: nil},
 				{httpMethod: http.MethodGet, path: "/users?page=0&limit=2", body: nil},
 				{httpMethod: http.MethodGet, path: "/users?page=-1&limit=2", body: nil},
 			},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"orderByに存在しないColumnが指定されているとき, 400になること",
-			[]requestParam{
+			title: "orderByに存在しないColumnが指定されているとき, 400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users?orderBy=hoge", body: nil},
 			},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"orderにASC・desc以外が指定されているとき, 400になること",
-			[]requestParam{
+			title: "orderにASC・desc以外が指定されているとき, 400になること",
+			requestParams: []requestParam{
 				{httpMethod: http.MethodGet, path: "/users?order=hoge", body: nil},
 			},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 	}
 
@@ -308,6 +308,7 @@ func TestUserController_CreateUser_正常系(t *testing.T) {
 	// clean
 	localdata.InitializeLocalData()
 }
+
 func TestUserController_CreateUser_異常系(t *testing.T) {
 	// setup
 	userNames1 := []string{" ", "　", "\n", "新規ユーザー 太郎", "新規ユーザー　太郎", "新規ユーザー\n太郎", " 新規ユーザー太郎", "新規ユーザー太郎　", " 新規ユーザー太郎\n"}
@@ -324,52 +325,52 @@ func TestUserController_CreateUser_異常系(t *testing.T) {
 
 	var params = []errorCheckParam{
 		{
-			"userNameが空文字のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"", "password":"Test1111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameが空文字のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"", "password":"Test1111"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames1, passwords1))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameに半角・全角スペース、改行が含まれているとき、400になること",
+			requestParams:   makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames1, passwords1))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"userNameが9文字以上のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"123456789", "password":"Test1111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameが9文字以上のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"123456789", "password":"Test1111"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordが空文字のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"test", "password":""}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが空文字のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"test", "password":""}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames2, passwords2))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordに半角・全角スペース、改行が含まれているとき、400になること",
+			requestParams:   makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames2, passwords2))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordが7文字以下のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"Test111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが7文字以下のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPost, path: "/users/new", body: strings.NewReader(`{"name":"新規ユーザー太郎", "password":"Test111"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
-			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames3, passwords3))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
+			requestParams:   makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames3, passwords3))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 		{
-			"passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
-			makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames4, passwords4))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
+			requestParams:   makeInputs(http.MethodPost, "/users/new", makeBodyList(makeUserReceiveDtoJsonList(userNames4, passwords4))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
 		},
 	}
 
@@ -386,8 +387,10 @@ func TestUserController_DeleteUser_正常系(t *testing.T) {
 	var params = []statusOKCheckParamUser{
 		{base: statusOKCheckParamBase{
 			title:        "正常にユーザーが削除できること_レスポンスチェック",
-			requestParam: requestParam{httpMethod: http.MethodDelete, path: "/users/1", body: nil}},
-			expectedBody: dto.UserResDto{Id: 1, Name: "まるお"}},
+			requestParam: requestParam{httpMethod: http.MethodDelete, path: "/users/1", body: nil},
+			doLogin:      true},
+			expectedBody: dto.UserResDto{Id: 1, Name: "まるお"},
+		},
 	}
 
 	// check
@@ -398,10 +401,18 @@ func TestUserController_DeleteUser_異常系(t *testing.T) {
 	// setup
 	var params = []errorCheckParam{
 		{
-			"存在しないuserIdのとき、404になること",
-			[]requestParam{{httpMethod: http.MethodDelete, path: "/users/9999", body: nil}},
-			http.StatusNotFound,
-			message.UserNotFound,
+			title:           "未ログイン状態のとき、401になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodDelete, path: "/users/1", body: nil}},
+			expectedCode:    http.StatusUnauthorized,
+			expectedMessage: message.UnAuthorized,
+		},
+		{
+			title:           "ログインユーザーと異なるユーザーを削除しようとしたとき、403になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodDelete, path: "/users/2", body: nil}},
+			expectedCode:    http.StatusForbidden,
+			expectedMessage: message.Forbidden,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 	}
 
@@ -418,22 +429,30 @@ func TestUserController_UpdateUser_正常系(t *testing.T) {
 	var paramsUserController = []statusOKCheckParamUser{
 		{base: statusOKCheckParamBase{
 			title:        "正常にユーザー名が更新できること",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)}},
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)},
+			doLogin:      true,
+		},
 			expectedBody: dto.UserResDto{Id: 1, Name: "ハルキゲニア"},
 		},
 		{base: statusOKCheckParamBase{
 			title:        "正常にパスワードが更新できること",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"HogeHoge123"}`)}},
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"HogeHoge123"}`)},
+			doLogin:      true,
+		},
 			expectedBody: dto.UserResDto{Id: 1, Name: "ハルキゲニア"},
 		},
 		{base: statusOKCheckParamBase{
 			title:        "正常にユーザー名とパスワードが更新できること",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/2/update", body: strings.NewReader(`{"name":"バオバブの木", "password":"BaoBab123"}`)}},
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/2/update", body: strings.NewReader(`{"name":"バオバブの木", "password":"BaoBab123"}`)},
+			doLogin:      true,
+		},
 			expectedBody: dto.UserResDto{Id: 2, Name: "バオバブの木"},
 		},
 		{base: statusOKCheckParamBase{
 			title:        "ボディのuserIdにパスと異なる値が指定されているときにも、正常にパスで指定したユーザーが更新されること（ボディのuserIdが無視されること）",
-			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/3/update", body: strings.NewReader(`{"id":4,"name":"ビクトリア3世"}`)}},
+			requestParam: requestParam{httpMethod: http.MethodPut, path: "/users/3/update", body: strings.NewReader(`{"id":4,"name":"ビクトリア3世"}`)},
+			doLogin:      true,
+		},
 			expectedBody: dto.UserResDto{Id: 3, Name: "ビクトリア3世"},
 		},
 	}
@@ -474,76 +493,107 @@ func TestUserController_UpdateUser_異常系(t *testing.T) {
 
 	var params = []errorCheckParam{
 		{
-			"存在しないuserIdのとき、404になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/9999/update", body: strings.NewReader(`{"name":"ハルキゲニア"}`)}},
-			http.StatusNotFound,
-			message.UserNotFound,
+			title:           "未ログイン状態のとき、401になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"hoge"}`)}},
+			expectedCode:    http.StatusUnauthorized,
+			expectedMessage: message.UnAuthorized,
+			doLogin:         false,
 		},
 		{
-			"userNameが空文字のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":""}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "ログインユーザーと異なるユーザーを更新しようとしたとき、403になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/2/update", body: strings.NewReader(`{"name":"hoge"}`)}},
+			expectedCode:    http.StatusForbidden,
+			expectedMessage: message.Forbidden,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"userNameがnilのとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameが空文字のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":""}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"userNameに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames1, passwords1))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameがnilのとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"userNameが9文字以上のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"123456789"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameに半角・全角スペース、改行が含まれているとき、400になること",
+			requestParams:   makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames1, passwords1))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordが空文字のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":""}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "userNameが9文字以上のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"name":"123456789"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordがnilのとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが空文字のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":""}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordに半角・全角スペース、改行が含まれているとき、400になること",
-			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames2, passwords2))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordがnilのとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordが7文字以下のとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"Test111"}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordに半角・全角スペース、改行が含まれているとき、400になること",
+			requestParams:   makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames2, passwords2))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
-			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames3, passwords3))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが7文字以下のとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{"password":"Test111"}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
-			makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames4, passwords4))),
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが英数大文字小文字を最低１つずつ含んでいないとき、400になること",
+			requestParams:   makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames3, passwords3))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 		{
-			"ユーザー名もパスワードも指定されていないとき、400になること",
-			[]requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{}`)}},
-			http.StatusBadRequest,
-			message.StatusBadRequest,
+			title:           "passwordが英数大文字小文字以外の文字を含んでいるとき、400になること",
+			requestParams:   makeInputs(http.MethodPut, "/users/1/update", makeBodyList(makeUserReceiveDtoJsonList(userNames4, passwords4))),
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
+		},
+		{
+			title:           "ユーザー名もパスワードも指定されていないとき、400になること",
+			requestParams:   []requestParam{{httpMethod: http.MethodPut, path: "/users/1/update", body: strings.NewReader(`{}`)}},
+			expectedCode:    http.StatusBadRequest,
+			expectedMessage: message.StatusBadRequest,
+			doLogin:         true,
+			loginUserId:     1,
 		},
 	}
 
@@ -561,6 +611,11 @@ func doStatusOKCheck__UserController(t *testing.T, params []statusOKCheckParamUs
 		req := httptest.NewRequest(p.base.requestParam.httpMethod, p.base.requestParam.path, p.base.requestParam.body)
 		if p.base.requestParam.httpMethod == http.MethodPost || p.base.requestParam.httpMethod == http.MethodPut {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		}
+		// -------- login if needed
+		if p.base.doLogin {
+			recForLogin := httptest.NewRecorder()
+			login(recForLogin, req, p.expectedBody.Id)
 		}
 		rec := httptest.NewRecorder()
 		_target.ServeHTTP(rec, req)
