@@ -8,6 +8,7 @@ import (
 	"go-app-template/src/apperror/message"
 	"go-app-template/src/usecase"
 	"go-app-template/src/usecase/appmodel"
+	"go-app-template/src/usecase/appmodel/session"
 	"net/http"
 	"strconv"
 
@@ -212,6 +213,15 @@ func (u UserController) UpdateUser(c echo.Context) error {
 			return apperror.ResponseErrorJSON(c, err, message.UserNotFound)
 		}
 		return apperror.ResponseErrorJSON(c, err, message.UpdateUserFailed)
+	}
+
+	// make user to login after change password
+	if len(newUser.Password) != 0 {
+		// invalidate session
+		manager := session.NewSessionManager()
+		if err = manager.InvalidateSession(c); err != nil {
+			return apperror.ResponseErrorJSON(c, err, message.LogoutFailed)
+		}
 	}
 
 	return c.JSON(http.StatusOK, updated)
