@@ -17,16 +17,12 @@
 
 * golangで基本的なAPIをつくる
 * 機能
+    * ログイン・ログアウト
     * ユーザーテーブルのCRUD
-    * Rの全件取得はソート、ページングもする
+        * 全件取得→ ソート, ページング
 * その他
     * アーキテクチャはDDD(風)
     * 基本的なエラー機構, テストコード
-* WIP
-    * ログイン・ログアウト
-    * TODO
-        * ログイン・ログアウトのテスト
-        * ユーザー更新、ユーザー削除を未ログイン時にUnauthorizedにする
 
 ## ■Setup
 
@@ -45,9 +41,11 @@
 
 ## ■Routing
 
-* [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
-* POST `http://localhost:1323/login`
-    * ログイン
+[See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
+
+### POST `http://localhost:1323/login`
+
+ログイン
 
 ```
 curl -i -X POST \
@@ -60,8 +58,14 @@ curl -i -X POST \
  'http://localhost:1323/login'
 ```
 
-* POST `http://localhost:1323/users/new`
-    * ユーザー登録
+### GET `http://localhost:1323/logout`
+
+ログアウト
+
+
+### POST `http://localhost:1323/users/new`
+
+ユーザー登録
 
 ```
 curl -i -X POST \
@@ -74,17 +78,19 @@ curl -i -X POST \
  'http://localhost:1323/users/new'
 ```
 
-* GET `http://localhost:1323/users/:id`
-    * ユーザー取得
-    
-* GET `http://localhost:1323/users?orderBy=name&order=ASC&limit=1&offset=1`
-    * ユーザー全取得
-    * オプション: orderBy, order, limit, offset
+### GET `http://localhost:1323/users/:id`
 
-* PUT `http://localhost:1323/users/:id/update`
-    * ユーザー更新
-    * パターン: ユーザー名のみ, パスワードのみ, 両方
+ユーザー取得
     
+### GET `http://localhost:1323/users?orderBy=name&order=ASC&limit=1&offset=1`
+
+ユーザー全取得
+オプション: orderBy, order, limit, offset
+
+### PUT `http://localhost:1323/users/:id/update`
+
+ユーザー更新
+
 ```
 curl -i -X PUT \
    -H "Content-Type:application/json" \
@@ -96,5 +102,12 @@ curl -i -X PUT \
  'http://localhost:1323/users/1/update'
 ```
 
-* DELETE `http://localhost:1323/users/:id`
-    * ユーザー削除
+* ログイン必須
+* パターン: ユーザー名のみ, パスワードのみ, 両方
+    
+
+### DELETE `http://localhost:1323/users/:id`
+
+ユーザー削除
+
+* ログイン必須
