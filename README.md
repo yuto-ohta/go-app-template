@@ -43,9 +43,8 @@
 
 [See Me](https://github.com/yuto-ohta/go-app-template/blob/master/src/config/route/router.go)
 
-### POST `http://localhost:1323/login`
+### ▼ログイン　POST `http://localhost:1323/login`
 
-ログイン
 
 ```
 curl -i -X POST \
@@ -58,14 +57,9 @@ curl -i -X POST \
  'http://localhost:1323/login'
 ```
 
-### GET `http://localhost:1323/logout`
+### ▼ログアウト　GET `http://localhost:1323/logout`
 
-ログアウト
-
-
-### POST `http://localhost:1323/users/new`
-
-ユーザー登録
+### ▼ユーザー登録　POST `http://localhost:1323/users/new`
 
 ```
 curl -i -X POST \
@@ -78,18 +72,13 @@ curl -i -X POST \
  'http://localhost:1323/users/new'
 ```
 
-### GET `http://localhost:1323/users/:id`
-
-ユーザー取得
+### ▼ユーザー取得　GET `http://localhost:1323/users/:id`
     
-### GET `http://localhost:1323/users?orderBy=name&order=ASC&limit=1&offset=1`
+### ▼ユーザー全取得　GET `http://localhost:1323/users?orderBy=name&order=ASC&limit=1&offset=1`
 
-ユーザー全取得
 オプション: orderBy, order, limit, offset
 
-### PUT `http://localhost:1323/users/:id/update`
-
-ユーザー更新
+### ▼ユーザー更新　PUT `http://localhost:1323/users/:id/update`
 
 ```
 curl -i -X PUT \
@@ -106,8 +95,6 @@ curl -i -X PUT \
 * パターン: ユーザー名のみ, パスワードのみ, 両方
     
 
-### DELETE `http://localhost:1323/users/:id`
-
-ユーザー削除
+### ▼ユーザー削除　DELETE `http://localhost:1323/users/:id`
 
 * ログイン必須
